@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMA Voice Studio PRO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+:root{--bg:#080A0F;--surface:#0F1219;--card:#141820;--border:#1E2430;--accent:#00E5FF;--accent2:#7B2FFF;--text:#E8EAF0;--muted:#6B7280;--success:#00E096;--error:#FF4D6D;--warn:#FFB800}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+.logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:9px;font-family:'Space Mono',monospace;letter-spacing:1px;color:var(--accent);border:1px solid rgba(0,229,255,.3);padding:3px 8px;border-radius:20px}
+.hero{text-align:center;padding:30px 20px 16px}
+.hero h1{font-size:clamp(22px,7vw,40px);font-weight:700;line-height:1.1;margin-bottom:8px;letter-spacing:-1px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:13px;color:var(--muted);max-width:300px;margin:0 auto;line-height:1.5}
+.waveform{display:flex;align-items:center;justify-content:center;gap:3px;margin:12px auto;height:24px}
+.wave-bar{width:3px;background:linear-gradient(to top,var(--accent2),var(--accent));border-radius:2px;animation:wave 1.2s ease-in-out infinite;opacity:.7}
+.wave-bar:nth-child(1){height:8px;animation-delay:0s}.wave-bar:nth-child(2){height:16px;animation-delay:.1s}.wave-bar:nth-child(3){height:24px;animation-delay:.2s}.wave-bar:nth-child(4){height:18px;animation-delay:.3s}.wave-bar:nth-child(5){height:22px;animation-delay:.4s}.wave-bar:nth-child(6){height:14px;animation-delay:.5s}.wave-bar:nth-child(7){height:20px;animation-delay:.6s}.wave-bar:nth-child(8){height:10px;animation-delay:.7s}
+@keyframes wave{0%,100%{transform:scaleY(.5);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+.container{max-width:600px;margin:0 auto;padding:0 14px 80px}
+
+/* Steps pill nav */
+.steps-nav{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);padding:4px;border-radius:12px;border:1px solid var(--border)}
+.step-pill{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);cursor:default;transition:all .3s;letter-spacing:.5px}
+.step-pill.done{color:var(--success);background:rgba(0,224,150,.08)}
+.step-pill.active{color:#000;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px;display:none;animation:fadeIn .3s ease}
+.card.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.card-desc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+
+/* Big action button */
+.big-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:18px;color:#000;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.big-btn:active{transform:scale(.98)}.big-btn:disabled{opacity:.4;cursor:not-allowed}
+.sec-btn{width:100%;background:transparent;border:1px solid var(--accent);border-radius:12px;padding:14px;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;text-decoration:none}
+.sec-btn:hover{background:rgba(0,229,255,.08)}
+.ghost-btn{width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;padding:13px;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.ghost-btn:hover{border-color:var(--text);color:var(--text)}
+
+/* Record */
+.record-zone{background:var(--surface);border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:10px;transition:all .3s}
+.record-zone.recording{border-color:var(--error);background:rgba(255,77,109,.05)}
+.record-zone.done{border-color:var(--success);background:rgba(0,224,150,.05)}
+.record-icon{font-size:36px;margin-bottom:8px}
+.record-pulse{width:60px;height:60px;border-radius:50%;background:var(--error);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;animation:pulse-rec 1s infinite;display:none}
+.record-zone.recording .record-pulse{display:flex}
+.record-zone.recording .record-icon{display:none}
+@keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.5)}70%{box-shadow:0 0 0 12px rgba(255,77,109,0)}}
+.record-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.record-sub{font-size:12px;color:var(--muted)}
+.record-timer{font-size:28px;font-family:'Space Mono',monospace;color:var(--error);margin:8px 0;display:none}
+.record-zone.recording .record-timer{display:block}
+
+/* Upload */
+.upload-zone{border:1.5px dashed var(--border);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .3s;position:relative;margin-bottom:8px}
+.upload-zone:hover,.upload-zone.filled{border-color:var(--accent);background:rgba(0,229,255,.03)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone p{font-size:12px;color:var(--muted)}
+.upload-zone strong{color:var(--accent)}
+.file-chip{display:none;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.2);border-radius:8px;padding:8px 12px;margin-top:6px}
+.file-chip.show{display:flex}
+.file-chip-name{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Preset grid */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.preset-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.preset-card.active{border-color:var(--accent);background:rgba(0,229,255,.07)}
+.preset-card .picon{font-size:24px;margin-bottom:6px}
+.preset-card .pname{font-size:13px;font-weight:600;margin-bottom:2px}
+.preset-card .pdesc{font-size:10px;color:var(--muted);line-height:1.4}
+.preset-card.active .pname{color:var(--accent)}
+.preset-badge{font-size:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;padding:2px 6px;border-radius:4px;font-weight:700;display:inline-block;margin-bottom:6px}
+
+/* Progress */
+.prog-wrap{background:var(--card);border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:18px;text-align:center;display:none;margin:10px 0}
+.prog-wrap.show{display:block}
+.prog-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.prog-step{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--surface);font-size:12px;color:var(--muted);transition:all .3s}
+.prog-step.active{background:rgba(0,229,255,.08);color:var(--text);border:1px solid rgba(0,229,255,.2)}
+.prog-step.done{background:rgba(0,224,150,.06);color:var(--success);border:1px solid rgba(0,224,150,.15)}
+.prog-step-icon{font-size:16px;width:24px;text-align:center}
+.prog-bar-wrap{background:var(--surface);border-radius:100px;height:4px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;width:0%;transition:width .5s ease}
+
+/* Audio compare */
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.audio-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px}
+.audio-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+.audio-label.enhanced{color:var(--success)}
+audio{width:100%;accent-color:var(--accent)}
+
+/* FX toggles - simple */
+.fx-row{display:flex;flex-direction:column;gap:8px}
+.fx-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:border-color .2s}
+.fx-item.on{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.04)}
+.fx-left{display:flex;align-items:center;gap:10px}
+.fx-emoji{font-size:18px}
+.fx-info .fx-name{font-size:13px;font-weight:600}
+.fx-info .fx-desc{font-size:11px;color:var(--muted)}
+.toggle{width:40px;height:22px;background:var(--border);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(18px)}
+.fx-slider{display:none;padding:8px 14px 12px;background:var(--surface);border:1px solid rgba(0,229,255,.2);border-top:none;border-radius:0 0 10px 10px;margin-top:-8px}
+.fx-slider.show{display:block}
+.slider-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.slider-lbl{font-size:11px;color:var(--muted);width:60px}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.slider-val{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;width:36px;text-align:right}
+
+/* Mix section */
+.mix-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.mix-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.mix-card-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;margin-bottom:10px}
+.vol-display{font-size:22px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;text-align:center;margin:6px 0}
+
+/* Trim */
+.trim-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin:10px 0}
+canvas{width:100%;height:56px;display:block;border-radius:6px;margin-bottom:10px}
+.trim-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.trim-lbl{font-size:11px;color:var(--muted);width:36px}
+.trim-val{font-size:11px;font-family:'Space Mono',monospace;width:40px;text-align:right}
+.trim-val.start{color:var(--success)}
+.trim-val.end{color:var(--error)}
+.quick-trims{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.qt-btn{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px;font-size:11px;color:var(--muted);cursor:pointer;min-width:60px;text-align:center}
+.qt-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Result */
+.result-wrap{background:rgba(0,224,150,.05);border:1px solid rgba(0,224,150,.2);border-radius:14px;padding:16px;margin:10px 0}
+.result-top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.result-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.result-title{font-size:14px;font-weight:700;color:var(--success)}
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.fmt-btn{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--muted);transition:all .2s}
+.fmt-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07);font-weight:700}
+.info{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.1);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}
+.info strong{color:var(--text)}
+.tabs{display:flex;gap:5px;margin-bottom:10px}
+.tab{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;text-align:center;font-size:11px;color:var(--muted);transition:all .2s}
+.tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07)}
+.tp{display:none}.tp.active{display:block}
+footer{text-align:center;padding:16px;font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px}
+footer span{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">AMA<span>/</span>VOICE</div>
+  <div class="badge">PRO STUDIO</div>
+</header>
+<div class="hero">
+  <h1>Record.<br><em>Sound Pro.</em></h1>
+  <p>AI-powered vocal enhancement, beat mixing, trimming — all in one tap.</p>
+  <div class="waveform">
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Step nav -->
+  <div class="steps-nav">
+    <div class="step-pill active" id="sp1">🎙 VOCAL</div>
+    <div class="step-pill" id="sp2">✨ ENHANCE</div>
+    <div class="step-pill" id="sp3">🥁 BEAT</div>
+    <div class="step-pill" id="sp4">🎛 MIX</div>
+    <div class="step-pill" id="sp5">✂ TRIM</div>
+    <div class="step-pill" id="sp6">⬇ EXPORT</div>
+  </div>
+
+  <!-- STEP 1: Record/Upload Vocals -->
+  <div class="card show" id="s1">
+    <div class="card-title">🎙️ Record your vocals</div>
+    <div class="card-desc">Sing or rap your lyrics. We'll handle all the professional editing automatically.</div>
+    <div class="tabs">
+      <div class="tab active" onclick="st(1,'rec')">🎙️ Record</div>
+      <div class="tab" onclick="st(1,'up')">📁 Upload</div>
+    </div>
+    <div class="tp active" id="t1-rec">
+      <div class="record-zone" id="recZone" onclick="toggleRecord()">
+        <div class="record-pulse">🎤</div>
+        <div class="record-icon">🎙️</div>
+        <div class="record-timer" id="recTimer">0:00</div>
+        <div class="record-title" id="recTitle">Tap to start recording</div>
+        <div class="record-sub" id="recSub">Sing close to your mic in a quiet room</div>
+      </div>
+    </div>
+    <div class="tp" id="t1-up">
+      <div class="upload-zone" id="vUpZone">
+        <input type="file" id="vFile" accept="audio/*" onchange="onVocalFile(this)">
+        <div style="font-size:28px;margin-bottom:6px">🎤</div>
+        <p><strong>Tap to upload</strong> your vocal recording</p>
+        <p style="font-size:10px;margin-top:3px">MP3, WAV, AAC, M4A supported</p>
+      </div>
+      <div class="file-chip" id="vChip"><span>🎵</span><span class="file-chip-name" id="vChipName"></span><span style="color:var(--success)">✓</span></div>
+    </div>
+    <div class="info">💡 <strong>Pro tip:</strong> Record in a bathroom or small room. Turn off fans and AC. Sing at natural speaking volume — not too loud.</div>
+    <button class="big-btn" id="s1Next" onclick="goTo(2)" disabled>Enhance My Vocals →</button>
+  </div>
+
+  <!-- STEP 2: Auto Enhance -->
+  <div class="card" id="s2">
+    <div class="card-title">✨ Professional Enhancement</div>
+    <div class="card-desc">Choose your sound. One tap makes your voice radio-ready automatically.</div>
+
+    <div class="preset-grid">
+      <div class="preset-card active" id="p-vocal" onclick="pickPreset('vocal')">
+        <div class="preset-badge">RECOMMENDED</div>
+        <div class="picon">🎤</div>
+        <div class="pname">Vocal Clean</div>
+        <div class="pdesc">Noise removal, warmth boost, professional compression</div>
+      </div>
+      <div class="preset-card" id="p-rap" onclick="pickPreset('rap')">
+        <div class="picon">🔥</div>
+        <div class="pname">Rap / Trap</div>
+        <div class="pdesc">Punchy attack, crisp highs, hard compression</div>
+      </div>
+      <div class="preset-card" id="p-afro" onclick="pickPreset('afro')">
+        <div class="picon">🌍</div>
+        <div class="pname">Afrobeats</div>
+        <div class="pdesc">Warm, bright, smooth radio-ready sound</div>
+      </div>
+      <div class="preset-card" id="p-nf" onclick="pickPreset('nf')">
+        <div class="picon">🖤</div>
+        <div class="pname">NF / Emo Rap</div>
+        <div class="pdesc">Raw, intimate, deep — minimal processing</div>
+      </div>
+    </div>
+
+    <!-- Optional FX (collapsed by default) -->
+    <details style="margin-bottom:12px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
+        <span>⚙️</span> <span>Optional effects (advanced)</span>
+      </summary>
+      <div class="fx-row" style="margin-top:10px">
+        <div class="fx-item" id="fxiReverb">
+          <div class="fx-left"><span class="fx-emoji">🏛️</span><div class="fx-info"><div class="fx-name">Reverb</div><div class="fx-desc">Room / space sound</div></div></div>
+          <button class="toggle" id="togReverb" onclick="toggleFX('Reverb')"></button>
+        </div>
+        <div class="fx-slider" id="slReverb">
+          <div class="slider-row"><span class="slider-lbl">Room size</span><input type="range" id="reverbRoom" min="0.1" max="0.99" step="0.01" value="0.4" oninput="sv('reverbRoomV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="reverbRoomV">0.40</span></div>
+          <div class="slider-row"><span class="slider-lbl">Mix amount</span><input type="range" id="reverbWet" min="0.05" max="0.5" step="0.01" value="0.2" oninput="sv('reverbWetV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="reverbWetV">0.20</span></div>
+        </div>
+        <div class="fx-item" id="fxiEcho">
+          <div class="fx-left"><span class="fx-emoji">🔁</span><div class="fx-info"><div class="fx-name">Echo / Delay</div><div class="fx-desc">Repeating echo effect</div></div></div>
+          <button class="toggle" id="togEcho" onclick="toggleFX('Echo')"></button>
+        </div>
+        <div class="fx-slider" id="slEcho">
+          <div class="slider-row"><span class="slider-lbl">Delay time</span><input type="range" id="echoDelay" min="0.1" max="0.8" step="0.05" value="0.25" oninput="sv('echoDelayV',parseFloat(this.value).toFixed(2)+'s')"><span class="slider-val" id="echoDelayV">0.25s</span></div>
+          <div class="slider-row"><span class="slider-lbl">Feedback</span><input type="range" id="echoFeedback" min="0.1" max="0.5" step="0.01" value="0.25" oninput="sv('echoFeedbackV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="echoFeedbackV">0.25</span></div>
+        </div>
+        <div class="fx-item" id="fxiPitch">
+          <div class="fx-left"><span class="fx-emoji">🎵</span><div class="fx-info"><div class="fx-name">Pitch Shift</div><div class="fx-desc">Raise or lower your pitch</div></div></div>
+          <button class="toggle" id="togPitch" onclick="toggleFX('Pitch')"></button>
+        </div>
+        <div class="fx-slider" id="slPitch">
+          <div class="slider-row"><span class="slider-lbl">Semitones</span><input type="range" id="pitchSt" min="-6" max="6" step="1" value="0" oninput="sv('pitchStV',(this.value>0?'+':'')+this.value+' st')"><span class="slider-val" id="pitchStV">0 st</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="prog-wrap" id="enhProg">
+      <div class="prog-steps" id="enhSteps">
+        <div class="prog-step" id="ps1"><span class="prog-step-icon">🔇</span>Removing background noise...</div>
+        <div class="prog-step" id="ps2"><span class="prog-step-icon">🎚️</span>Applying EQ & presence boost...</div>
+        <div class="prog-step" id="ps3"><span class="prog-step-icon">💪</span>Compressing & balancing...</div>
+        <div class="prog-step" id="ps4"><span class="prog-step-icon">✨</span>Polishing & normalizing...</div>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" id="enhBar"></div></div>
+    </div>
+
+    <div id="enhCompare" style="display:none">
+      <div class="compare-wrap">
+        <div class="audio-card"><div class="audio-label">BEFORE</div><audio id="rawAudio" controls></audio></div>
+        <div class="audio-card"><div class="audio-label enhanced">AFTER ✓</div><audio id="enhAudio" controls></audio></div>
+      </div>
+    </div>
+
+    <button class="big-btn" id="enhBtn" onclick="enhanceVocal()">✨ Enhance My Vocals</button>
+    <button class="big-btn" id="s2Next" onclick="goTo(3)" disabled style="background:linear-gradient(135deg,var(--success),#009955)">Next — Upload Beat →</button>
+    <button class="ghost-btn" onclick="skipEnh()">Skip — use raw vocal</button>
+  </div>
+
+  <!-- STEP 3: Beat -->
+  <div class="card" id="s3">
+    <div class="card-title">🥁 Upload your beat</div>
+    <div class="card-desc">Upload any instrumental. Generated from Suno or any beat maker.</div>
+    <div class="upload-zone" id="bUpZone">
+      <input type="file" id="bFile" accept="audio/*" onchange="onBeatFile(this)">
+      <div style="font-size:32px;margin-bottom:6px">🥁</div>
+      <p><strong>Tap to upload</strong> your beat / instrumental</p>
+      <p style="font-size:10px;margin-top:3px">MP3, WAV supported</p>
+    </div>
+    <div class="file-chip" id="bChip"><span>🎵</span><span class="file-chip-name" id="bChipName"></span><span style="color:var(--success)">✓</span></div>
+    <div class="info">💡 No beat? Go to <strong>suno.com</strong> → generate one → download → upload here.</div>
+    <button class="big-btn" id="s3Next" onclick="goTo(4)" disabled style="margin-top:12px">Next — Mix →</button>
+  </div>
+
+  <!-- STEP 4: Mix -->
+  <div class="card" id="s4">
+    <div class="card-title">🎛️ Mix your song</div>
+    <div class="card-desc">Set vocal and beat volumes. AI has already set smart defaults for you.</div>
+
+    <div class="mix-grid">
+      <div class="mix-card">
+        <div class="mix-card-label">🎤 VOCALS</div>
+        <div class="vol-display" id="vVolDisp">85%</div>
+        <input type="range" id="vVol" min="0" max="150" value="85" style="width:100%;accent-color:var(--accent)" oninput="document.getElementById('vVolDisp').textContent=this.value+'%'">
+      </div>
+      <div class="mix-card">
+        <div class="mix-card-label">🥁 BEAT</div>
+        <div class="vol-display" id="bVolDisp">60%</div>
+        <input type="range" id="bVol" min="0" max="150" value="60" style="width:100%;accent-color:var(--accent2)" oninput="document.getElementById('bVolDisp').textContent=this.value+'%'">
+      </div>
+    </div>
+
+    <details style="margin-bottom:10px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
+        <span>⚙️</span><span>Advanced mix controls</span>
+      </summary>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+        <div class="slider-row"><span class="slider-lbl">Vocal delay</span><input type="range" id="vDelay" min="0" max="8000" step="100" value="0" oninput="sv('vDelayV',(this.value/1000).toFixed(1)+'s')"><span class="slider-val" id="vDelayV">0.0s</span></div>
+        <div class="slider-row"><span class="slider-lbl">Vocal pan</span><input type="range" id="vPan" min="-1" max="1" step="0.01" value="0" oninput="panLbl('vPanV',this.value)"><span class="slider-val" id="vPanV">C</span></div>
+        <div class="slider-row"><span class="slider-lbl">Beat pan</span><input type="range" id="bPan" min="-1" max="1" step="0.01" value="0" oninput="panLbl('bPanV',this.value)"><span class="slider-val" id="bPanV">C</span></div>
+        <div class="slider-row"><span class="slider-lbl">Master vol</span><input type="range" id="mastVol" min="0.5" max="2.0" step="0.05" value="1.0" oninput="sv('mastVolV',parseFloat(this.value).toFixed(1)+'x')"><span class="slider-val" id="mastVolV">1.0x</span></div>
+      </div>
+    </details>
+
+    <div class="prog-wrap" id="mixProg">
+      <div class="prog-steps">
+        <div class="prog-step" id="mps1"><span class="prog-step-icon">🎛️</span>Building effects chain...</div>
+        <div class="prog-step" id="mps2"><span class="prog-step-icon">🎚️</span>Mixing vocals & beat...</div>
+        <div class="prog-step" id="mps3"><span class="prog-step-icon">🔊</span>Mastering & normalizing...</div>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" id="mixBar"></div></div>
+    </div>
+
+    <button class="big-btn" onclick="mixTracks()" id="mixBtn">🎛️ Mix & Master My Song</button>
+  </div>
+
+  <!-- STEP 5: Trim -->
+  <div class="card" id="s5">
+    <div class="card-title">✂️ Trim your song</div>
+    <div class="card-desc">Remove unwanted parts from the start or end. Skip if it sounds perfect.</div>
+    <div class="trim-wrap">
+      <canvas id="waveCanvas"></canvas>
+      <div class="trim-row">
+        <span class="trim-lbl">▶ Start</span>
+        <input type="range" id="trimStart" min="0" max="100" step="0.1" value="0" oninput="onTrim()" style="flex:1;accent-color:var(--success)">
+        <span class="trim-val start" id="tsV">0.0s</span>
+      </div>
+      <div class="trim-row">
+        <span class="trim-lbl">⏹ End</span>
+        <input type="range" id="trimEnd" min="0" max="100" step="0.1" value="100" oninput="onTrim()" style="flex:1;accent-color:var(--error)">
+        <span class="trim-val end" id="teV">0.0s</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:11px;color:var(--muted)">Length: <strong style="color:var(--accent);font-family:'Space Mono',monospace" id="trimLen">0.0s</strong></span>
+        <button onclick="prevTrim()" style="background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--accent);cursor:pointer">▶ Preview</button>
+      </div>
+      <div class="quick-trims">
+        <div class="qt-btn" onclick="qTrim(0,30)">First 30s</div>
+        <div class="qt-btn" onclick="qTrim(0,60)">First 60s</div>
+        <div class="qt-btn" onclick="qTrim(0,15)">15s Clip</div>
+        <div class="qt-btn" onclick="resetTrim()">Full Song</div>
+      </div>
+    </div>
+    <audio id="trimAudio" controls style="width:100%;accent-color:var(--accent);margin-bottom:8px"></audio>
+
+    <div class="prog-wrap" id="trimProg">
+      <div class="prog-bar-wrap"><div class="prog-bar" id="trimBar"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="trimLabel">Trimming...</div>
+    </div>
+
+    <button class="big-btn" onclick="applyTrim()" id="trimBtn">✂️ Apply Trim</button>
+    <button class="ghost-btn" onclick="skipTrim()">Skip — export full song</button>
+  </div>
+
+  <!-- STEP 6: Export -->
+  <div class="card" id="s6">
+    <div class="card-title">🎵 Your song is ready!</div>
+    <div class="card-desc">Listen, then download in your preferred format.</div>
+    <div class="result-wrap">
+      <div class="result-top"><div class="result-dot"></div><div class="result-title">Mixed & mastered professionally ✅</div></div>
+      <audio id="finalAudio" controls style="width:100%;accent-color:var(--accent)"></audio>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin:10px 0 6px;font-family:'Space Mono',monospace;letter-spacing:.5px">EXPORT FORMAT</div>
+    <div class="fmt-grid">
+      <div class="fmt-btn active" id="fmtWav" onclick="selFmt('wav')">🎵 WAV<div style="font-size:10px;color:var(--muted);margin-top:2px">Lossless quality</div></div>
+      <div class="fmt-btn" id="fmtMp3" onclick="selFmt('mp3')">📱 MP3<div style="font-size:10px;color:var(--muted);margin-top:2px">Smaller file size</div></div>
+    </div>
+    <a class="big-btn" id="dlBtn" download="AMA-Voice-Studio.wav" style="text-decoration:none">⬇️ Download Song</a>
+    <button class="sec-btn" onclick="goTo(5)">✂️ Trim Again</button>
+    <button class="sec-btn" onclick="goTo(4)">🎛️ Remix</button>
+    <button class="ghost-btn" onclick="startOver()">🔄 Start New Song</button>
+    <div class="info" style="margin-top:10px">🚀 Share on <strong>Audiomack</strong>, <strong>TikTok</strong> or <strong>Instagram Reels</strong> to go viral!</div>
+  </div>
+</div>
+<footer>Built by <span>AMA AUTOMATIONS</span> · Lagos, Nigeria</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let vocalBlob=null, enhBlob=null, beatBlob=null, mixedBuf=null;
+let selectedPreset='vocal', selectedFmt='wav';
+let fxOn={Reverb:false,Echo:false,Pitch:false};
+let mediaRec=null, recChunks=[], isRec=false, recTimer=null, recSecs=0;
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function goTo(n){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('show'));
+  document.getElementById('s'+n).classList.add('show');
+  ['sp1','sp2','sp3','sp4','sp5','sp6'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.className='step-pill'+(i+1<n?' done':i+1===n?' active':'');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function st(s,tab){
+  document.querySelectorAll(`#s${s} .tab`).forEach((t,i)=>t.classList.toggle('active',(tab==='rec'&&i===0)||(tab==='up'&&i===1)));
+  document.querySelectorAll(`#s${s} .tp`).forEach((p,i)=>p.classList.toggle('active',(tab==='rec'&&i===0)||(tab==='up'&&i===1)));
+}
+
+// ─── Recording ───────────────────────────────────────────────────────────────
+async function toggleRecord(){
+  if(!isRec){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:44100}});
+      recChunks=[];
+      const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+      mediaRec=new MediaRecorder(stream,{mimeType});
+      mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data)};
+      mediaRec.onstop=()=>{
+        vocalBlob=new Blob(recChunks,{type:'audio/webm'});
+        const z=document.getElementById('recZone');
+        z.className='record-zone done';
+        document.getElementById('recTitle').textContent=`✅ Recording saved (${recSecs}s)`;
+        document.getElementById('recSub').textContent='Tap again to re-record';
+        document.getElementById('s1Next').disabled=false;
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      mediaRec.start(100); isRec=true; recSecs=0;
+      document.getElementById('recZone').className='record-zone recording';
+      document.getElementById('recTitle').textContent='Recording... tap to stop';
+      document.getElementById('recSub').textContent='';
+      recTimer=setInterval(()=>{
+        recSecs++;
+        const m=Math.floor(recSecs/60),s=recSecs%60;
+        document.getElementById('recTimer').textContent=m+':'+(s<10?'0':'')+s;
+      },1000);
+    }catch(e){
+      document.getElementById('recTitle').textContent='❌ Mic denied — use Upload tab';
+    }
+  }else{
+    mediaRec.stop(); isRec=false; clearInterval(recTimer);
+  }
+}
+
+function onVocalFile(inp){
+  const f=inp.files[0]; if(!f)return;
+  vocalBlob=f;
+  document.getElementById('vChipName').textContent=f.name;
+  document.getElementById('vChip').classList.add('show');
+  document.getElementById('vUpZone').classList.add('filled');
+  document.getElementById('s1Next').disabled=false;
+}
+
+function onBeatFile(inp){
+  const f=inp.files[0]; if(!f)return;
+  beatBlob=f;
+  document.getElementById('bChipName').textContent=f.name;
+  document.getElementById('bChip').classList.add('show');
+  document.getElementById('bUpZone').classList.add('filled');
+  document.getElementById('s3Next').disabled=false;
+}
+
+// ─── Preset selection ─────────────────────────────────────────────────────────
+function pickPreset(p){
+  selectedPreset=p;
+  ['vocal','rap','afro','nf'].forEach(k=>document.getElementById('p-'+k).classList.toggle('active',k===p));
+}
+
+// ─── FX toggles ───────────────────────────────────────────────────────────────
+function toggleFX(name){
+  fxOn[name]=!fxOn[name];
+  document.getElementById('tog'+name).classList.toggle('on',fxOn[name]);
+  document.getElementById('fxi'+name).classList.toggle('on',fxOn[name]);
+  document.getElementById('sl'+name).classList.toggle('show',fxOn[name]);
+}
+
+function sv(id,val){if(document.getElementById(id))document.getElementById(id).textContent=val;}
+function panLbl(id,v){const n=parseFloat(v);document.getElementById(id).textContent=n===0?'C':n<0?'L'+Math.abs(Math.round(n*100)):'R'+Math.round(n*100);}
+
+// ─── Presets config ───────────────────────────────────────────────────────────
+const PRESETS={
+  vocal:{
+    hpFreq:100,  // remove rumble below 100Hz
+    lpFreq:16000, // remove harshness above 16kHz
+    lowCut:-3,   // reduce muddiness at 200Hz
+    lowCutF:200,
+    midBoost:4,  // presence/clarity at 3kHz
+    midBoostF:3000,
+    hiBoost:3,   // air at 10kHz
+    hiBoostF:10000,
+    deEss:-4,    // de-esser at 7kHz
+    deEssF:7000,
+    compThresh:-24, compRatio:4, compKnee:6,
+    compAttack:0.004, compRelease:0.2,
+    saturation:0, // subtle warmth
+    reverbWet:0.08, reverbDecay:0.4,
+    outputGain:1.3
+  },
+  rap:{
+    hpFreq:120,lpFreq:18000,
+    lowCut:-4,lowCutF:200,
+    midBoost:5,midBoostF:2500,
+    hiBoost:4,hiBoostF:8000,
+    deEss:-5,deEssF:6500,
+    compThresh:-20,compRatio:6,compKnee:4,
+    compAttack:0.002,compRelease:0.15,
+    saturation:20,
+    reverbWet:0.05,reverbDecay:0.3,
+    outputGain:1.4
+  },
+  afro:{
+    hpFreq:80,lpFreq:18000,
+    lowCut:-2,lowCutF:180,
+    midBoost:3,midBoostF:3500,
+    hiBoost:5,hiBoostF:12000,
+    deEss:-3,deEssF:7500,
+    compThresh:-22,compRatio:3,compKnee:8,
+    compAttack:0.005,compRelease:0.25,
+    saturation:10,
+    reverbWet:0.12,reverbDecay:0.5,
+    outputGain:1.3
+  },
+  nf:{
+    hpFreq:90,lpFreq:16000,
+    lowCut:-2,lowCutF:200,
+    midBoost:2,midBoostF:2000,
+    hiBoost:2,hiBoostF:8000,
+    deEss:-3,deEssF:6000,
+    compThresh:-28,compRatio:3,compKnee:10,
+    compAttack:0.006,compRelease:0.3,
+    saturation:0,
+    reverbWet:0.18,reverbDecay:0.6,
+    outputGain:1.2
+  }
+};
+
+// ─── Vocal Enhancement ───────────────────────────────────────────────────────
+async function enhanceVocal(){
+  if(!vocalBlob){alert('No vocal found. Go back and record or upload first.');return;}
+  const pr=PRESETS[selectedPreset];
+  document.getElementById('enhProg').classList.add('show');
+  document.getElementById('enhBtn').disabled=true;
+  document.getElementById('s2Next').disabled=true;
+
+  const steps=['ps1','ps2','ps3','ps4'];
+  const pcts=[0,25,55,80,100];
+  const bar=document.getElementById('enhBar');
+
+  function setStep(i){
+    steps.forEach((id,j)=>{
+      const el=document.getElementById(id);
+      if(j<i) el.className='prog-step done';
+      else if(j===i) el.className='prog-step active';
+      else el.className='prog-step';
+    });
+    bar.style.width=pcts[i]+'%';
+  }
+
+  try{
+    setStep(0); // noise removal
+    await new Promise(r=>setTimeout(r,300));
+    const audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const arrayBuf=await vocalBlob.arrayBuffer();
+    const srcBuf=await audioCtx.decodeAudioData(arrayBuf);
+    const sr=srcBuf.sampleRate;
+    const offline=new OfflineAudioContext(srcBuf.numberOfChannels,srcBuf.length,sr);
+    const src=offline.createBufferSource();
+    src.buffer=srcBuf;
+    let node=src;
+
+    // 1. High-pass (remove rumble + noise floor)
+    const hp=offline.createBiquadFilter();
+    hp.type='highpass'; hp.frequency.value=pr.hpFreq; hp.Q.value=0.7;
+    node.connect(hp); node=hp;
+
+    // 2. Low shelf cut (reduce muddiness)
+    const ls=offline.createBiquadFilter();
+    ls.type='peaking'; ls.frequency.value=pr.lowCutF; ls.Q.value=1.0; ls.gain.value=pr.lowCut;
+    node.connect(ls); node=ls;
+
+    setStep(1); // EQ
+    await new Promise(r=>setTimeout(r,200));
+
+    // 3. Presence/clarity boost
+    const mid=offline.createBiquadFilter();
+    mid.type='peaking'; mid.frequency.value=pr.midBoostF; mid.Q.value=1.2; mid.gain.value=pr.midBoost;
+    node.connect(mid); node=mid;
+
+    // 4. High shelf (air/brightness)
+    const hs=offline.createBiquadFilter();
+    hs.type='highshelf'; hs.frequency.value=pr.hiBoostF; hs.gain.value=pr.hiBoost;
+    node.connect(hs); node=hs;
+
+    // 5. De-esser (reduce harsh sibilance)
+    const dess=offline.createBiquadFilter();
+    dess.type='peaking'; dess.frequency.value=pr.deEssF; dess.Q.value=3.0; dess.gain.value=pr.deEss;
+    node.connect(dess); node=dess;
+
+    // 6. Low-pass (remove extreme highs)
+    const lp=offline.createBiquadFilter();
+    lp.type='lowpass'; lp.frequency.value=pr.lpFreq; lp.Q.value=0.5;
+    node.connect(lp); node=lp;
+
+    setStep(2); // compression
+    await new Promise(r=>setTimeout(r,200));
+
+    // 7. Compressor
+    const comp=offline.createDynamicsCompressor();
+    comp.threshold.value=pr.compThresh; comp.ratio.value=pr.compRatio;
+    comp.knee.value=pr.compKnee; comp.attack.value=pr.compAttack; comp.release.value=pr.compRelease;
+    node.connect(comp); node=comp;
+
+    // 8. Subtle saturation/warmth for rap preset
+    if(pr.saturation>0){
+      const ws=offline.createWaveShaper();
+      const curve=new Float32Array(256);
+      const k=pr.saturation;
+      for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=(Math.PI+k)*x/(Math.PI+k*Math.abs(x));}
+      ws.curve=curve; ws.oversample='2x';
+      node.connect(ws); node=ws;
+    }
+
+    // 9. Preset reverb (subtle, not echoing)
+    const conv=offline.createConvolver();
+    conv.buffer=makeIR(offline,pr.reverbDecay);
+    const dryG=offline.createGain(); dryG.gain.value=1-pr.reverbWet;
+    const wetG=offline.createGain(); wetG.gain.value=pr.reverbWet;
+    node.connect(dryG); node.connect(conv); conv.connect(wetG);
+    const merge=offline.createGain(); dryG.connect(merge); wetG.connect(merge); node=merge;
+
+    // 10. Optional user FX
+    if(fxOn.Reverb){
+      const w=parseFloat(document.getElementById('reverbWet').value);
+      const conv2=offline.createConvolver();
+      conv2.buffer=makeIR(offline,parseFloat(document.getElementById('reverbRoom').value));
+      const dG=offline.createGain(); dG.gain.value=1-w;
+      const wG=offline.createGain(); wG.gain.value=w;
+      node.connect(dG); node.connect(conv2); conv2.connect(wG);
+      const m=offline.createGain(); dG.connect(m); wG.connect(m); node=m;
+    }
+    if(fxOn.Echo){
+      const d=offline.createDelay(2.0);
+      const fb=offline.createGain();
+      d.delayTime.value=parseFloat(document.getElementById('echoDelay').value);
+      fb.gain.value=parseFloat(document.getElementById('echoFeedback').value);
+      node.connect(d); d.connect(fb); fb.connect(d);
+      const m=offline.createGain(); node.connect(m); d.connect(m); node=m;
+    }
+
+    // 11. Output gain
+    const out=offline.createGain(); out.gain.value=pr.outputGain;
+    node.connect(out); out.connect(offline.destination);
+    src.start(0);
+
+    setStep(3); // polishing
+    const rendered=await offline.startRendering();
+
+    // Normalize to -1dB
+    let maxV=0;
+    for(let ch=0;ch<rendered.numberOfChannels;ch++){
+      const d=rendered.getChannelData(ch);
+      for(let i=0;i<d.length;i++) maxV=Math.max(maxV,Math.abs(d[i]));
+    }
+    if(maxV>0.001){
+      const scale=0.891/maxV; // -1dB
+      for(let ch=0;ch<rendered.numberOfChannels;ch++){
+        const d=rendered.getChannelData(ch);
+        for(let i=0;i<d.length;i++) d[i]*=scale;
+      }
+    }
+
+    bar.style.width='100%';
+    enhBlob=toWav(rendered);
+    document.getElementById('rawAudio').src=URL.createObjectURL(vocalBlob);
+    document.getElementById('enhAudio').src=URL.createObjectURL(enhBlob);
+    document.getElementById('enhCompare').style.display='block';
+    document.getElementById('s2Next').disabled=false;
+    document.getElementById('enhProg').classList.remove('show');
+  }catch(e){
+    alert('Enhancement error: '+e.message);
+    document.getElementById('enhBtn').disabled=false;
+  }
+  document.getElementById('enhBtn').disabled=false;
+}
+
+function skipEnh(){enhBlob=vocalBlob;goTo(3);}
+
+// ─── Mixer ────────────────────────────────────────────────────────────────────
+async function mixTracks(){
+  const vocal=enhBlob||vocalBlob;
+  if(!vocal||!beatBlob){alert('Please upload both your vocal and beat first.');return;}
+  document.getElementById('mixProg').classList.add('show');
+  document.getElementById('mixBtn').disabled=true;
+  const vVol=document.getElementById('vVol').value/100;
+  const bVol=document.getElementById('bVol').value/100;
+  const vPan=parseFloat(document.getElementById('vPan').value);
+  const bPan=parseFloat(document.getElementById('bPan').value);
+  const vDelay=parseInt(document.getElementById('vDelay').value);
+  const master=parseFloat(document.getElementById('mastVol').value);
+
+  function stepM(i,pct){
+    ['mps1','mps2','mps3'].forEach((id,j)=>{
+      document.getElementById(id).className='prog-step'+(j<i?' done':j===i?' active':'');
+    });
+    document.getElementById('mixBar').style.width=pct+'%';
+  }
+
+  try{
+    stepM(0,10);
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const[vBuf,bBuf]=await Promise.all([
+      ctx.decodeAudioData(await vocal.arrayBuffer()),
+      ctx.decodeAudioData(await beatBlob.arrayBuffer())
+    ]);
+    const sr=ctx.sampleRate;
+    const totalLen=Math.max(vBuf.length+Math.floor(vDelay/1000*sr),bBuf.length);
+    const offline=new OfflineAudioContext(2,totalLen,sr);
+
+    stepM(1,40);
+
+    // Beat
+    const bSrc=offline.createBufferSource(); bSrc.buffer=bBuf;
+    const bGain=offline.createGain(); bGain.gain.value=bVol;
+    const bPanner=offline.createStereoPanner(); bPanner.pan.value=bPan;
+    bSrc.connect(bGain); bGain.connect(bPanner); bPanner.connect(offline.destination);
+    bSrc.start(0);
+
+    // Vocal (already enhanced)
+    const vSrc=offline.createBufferSource(); vSrc.buffer=vBuf;
+    const vGain=offline.createGain(); vGain.gain.value=vVol;
+    const vPanner=offline.createStereoPanner(); vPanner.pan.value=vPan;
+    vSrc.connect(vGain); vGain.connect(vPanner); vPanner.connect(offline.destination);
+    vSrc.start(vDelay/1000);
+
+    stepM(2,70);
+    const rendered=await offline.startRendering();
+
+    // Master normalize
+    let mx=0;
+    for(let ch=0;ch<rendered.numberOfChannels;ch++){
+      const d=rendered.getChannelData(ch);
+      for(let i=0;i<d.length;i++) mx=Math.max(mx,Math.abs(d[i]));
+    }
+    if(mx>0.001){
+      const sc=(0.891*master)/mx;
+      for(let ch=0;ch<rendered.numberOfChannels;ch++){
+        const d=rendered.getChannelData(ch);
+        for(let i=0;i<d.length;i++) d[i]*=sc;
+      }
+    }
+
+    document.getElementById('mixBar').style.width='100%';
+    mixedBuf=rendered;
+
+    // Go to trim
+    const url=URL.createObjectURL(toWav(rendered));
+    document.getElementById('trimAudio').src=url;
+    document.getElementById('finalAudio').src=url;
+    document.getElementById('dlBtn').href=url;
+    document.getElementById('mixProg').classList.remove('show');
+    initTrim(rendered);
+    goTo(5);
+  }catch(e){
+    alert('Mix error: '+e.message);
+  }
+  document.getElementById('mixBtn').disabled=false;
+}
+
+// ─── Trim ────────────────────────────────────────────────────────────────────
+function initTrim(buf){
+  const dur=buf.duration;
+  document.getElementById('trimStart').max=dur;
+  document.getElementById('trimEnd').max=dur;
+  document.getElementById('trimStart').value=0;
+  document.getElementById('trimEnd').value=dur;
+  document.getElementById('tsV').textContent='0.0s';
+  document.getElementById('teV').textContent=dur.toFixed(1)+'s';
+  document.getElementById('trimLen').textContent=dur.toFixed(1)+'s';
+  drawWave(buf);
+}
+
+function drawWave(buf){
+  const canvas=document.getElementById('waveCanvas');
+  const W=canvas.offsetWidth||300, H=56;
+  canvas.width=W*2; canvas.height=H*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+  const data=buf.getChannelData(0);
+  const step=Math.ceil(data.length/W);
+  const startPct=parseFloat(document.getElementById('trimStart').value)/buf.duration;
+  const endPct=parseFloat(document.getElementById('trimEnd').value)/buf.duration;
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<W;i++){
+    let mn=1,mx=-1;
+    for(let j=0;j<step;j++){const v=data[i*step+j]||0;if(v<mn)mn=v;if(v>mx)mx=v;}
+    const inR=i/W>=startPct&&i/W<=endPct;
+    ctx.strokeStyle=inR?'rgba(0,229,255,.85)':'rgba(107,114,128,.3)';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(i,(1+mn)*H/2);
+    ctx.lineTo(i,(1+mx)*H/2);
+    ctx.stroke();
+  }
+}
+
+function onTrim(){
+  if(!mixedBuf)return;
+  const dur=mixedBuf.duration;
+  let s=parseFloat(document.getElementById('trimStart').value);
+  let e=parseFloat(document.getElementById('trimEnd').value);
+  if(s>=e-0.5){s=e-0.5;document.getElementById('trimStart').value=s;}
+  document.getElementById('tsV').textContent=s.toFixed(1)+'s';
+  document.getElementById('teV').textContent=e.toFixed(1)+'s';
+  document.getElementById('trimLen').textContent=(e-s).toFixed(1)+'s';
+  drawWave(mixedBuf);
+}
+
+function qTrim(s,e){
+  if(!mixedBuf)return;
+  document.getElementById('trimStart').value=Math.min(s,mixedBuf.duration);
+  document.getElementById('trimEnd').value=Math.min(e,mixedBuf.duration);
+  onTrim();
+}
+
+function resetTrim(){
+  if(!mixedBuf)return;
+  document.getElementById('trimStart').value=0;
+  document.getElementById('trimEnd').value=mixedBuf.duration;
+  onTrim();
+}
+
+function prevTrim(){
+  const s=parseFloat(document.getElementById('trimStart').value);
+  const e=parseFloat(document.getElementById('trimEnd').value);
+  const audio=document.getElementById('trimAudio');
+  audio.currentTime=s; audio.play();
+  setTimeout(()=>audio.pause(),(e-s)*1000);
+}
+
+async function applyTrim(){
+  if(!mixedBuf){goTo(6);return;}
+  const s=parseFloat(document.getElementById('trimStart').value);
+  const e=parseFloat(document.getElementById('trimEnd').value);
+  if(e-s<0.5){alert('Trim section must be at least 0.5 seconds.');return;}
+  document.getElementById('trimProg').classList.add('show');
+  document.getElementById('trimBtn').disabled=true;
+  document.getElementById('trimBar').style.width='30%';
+
+  try{
+    const sr=mixedBuf.sampleRate;
+    const ss=Math.floor(s*sr), es=Math.floor(e*sr);
+    const nc=mixedBuf.numberOfChannels;
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const tBuf=ctx.createBuffer(nc,es-ss,sr);
+    for(let ch=0;ch<nc;ch++) tBuf.getChannelData(ch).set(mixedBuf.getChannelData(ch).subarray(ss,es));
+
+    // Fade 10ms in/out
+    const fade=Math.floor(0.01*sr);
+    for(let ch=0;ch<nc;ch++){
+      const d=tBuf.getChannelData(ch);
+      for(let i=0;i<fade&&i<d.length;i++){d[i]*=i/fade; d[d.length-1-i]*=i/fade;}
+    }
+
+    document.getElementById('trimBar').style.width='70%';
+    let blob;
+    try{blob=selectedFmt==='mp3'&&typeof lamejs!=='undefined'?await encMP3(tBuf):toWav(tBuf);}catch(err){blob=toWav(tBuf);}
+    document.getElementById('trimBar').style.width='100%';
+    const url=URL.createObjectURL(blob);
+    document.getElementById('finalAudio').src=url;
+    document.getElementById('dlBtn').href=url;
+    document.getElementById('dlBtn').download='AMA-Voice-Studio-trimmed.'+(selectedFmt==='mp3'?'mp3':'wav');
+    await new Promise(r=>setTimeout(r,300));
+    document.getElementById('trimProg').classList.remove('show');
+    goTo(6);
+  }catch(e){
+    alert('Trim error: '+e.message);
+  }
+  document.getElementById('trimBtn').disabled=false;
+}
+
+async function skipTrim(){
+  if(!mixedBuf){goTo(6);return;}
+  let blob;
+  try{blob=selectedFmt==='mp3'&&typeof lamejs!=='undefined'?await encMP3(mixedBuf):toWav(mixedBuf);}catch(e){blob=toWav(mixedBuf);}
+  const url=URL.createObjectURL(blob);
+  document.getElementById('finalAudio').src=url;
+  document.getElementById('dlBtn').href=url;
+  document.getElementById('dlBtn').download='AMA-Voice-Studio.'+(selectedFmt==='mp3'?'mp3':'wav');
+  goTo(6);
+}
+
+// ─── Format ───────────────────────────────────────────────────────────────────
+function selFmt(f){
+  selectedFmt=f;
+  document.getElementById('fmtWav').classList.toggle('active',f==='wav');
+  document.getElementById('fmtMp3').classList.toggle('active',f==='mp3');
+}
+
+// ─── Audio utils ──────────────────────────────────────────────────────────────
+function makeIR(ctx,decay){
+  const len=Math.floor(ctx.sampleRate*decay*2.5);
+  const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let ch=0;ch<2;ch++){
+    const d=buf.getChannelData(ch);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay*2.5);
+  }
+  return buf;
+}
+
+function toWav(buf){
+  const nc=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length*nc*2;
+  const ab=new ArrayBuffer(44+len),v=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+len,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*nc*2,true);v.setUint16(32,nc*2,true);
+  v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,len,true);
+  let off=44;
+  for(let i=0;i<buf.length;i++) for(let ch=0;ch<nc;ch++){
+    const s=Math.max(-1,Math.min(1,buf.getChannelData(ch)[i]));
+    v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+async function encMP3(buf){
+  return new Promise(res=>{
+    const nc=buf.numberOfChannels,sr=buf.sampleRate;
+    const enc=new lamejs.Mp3Encoder(nc,sr,128),bs=1152,mp3=[];
+    const L=buf.getChannelData(0),R=nc>1?buf.getChannelData(1):L;
+    const i16=f=>Math.max(-32768,Math.min(32767,Math.round(f*32767)));
+    for(let i=0;i<buf.length;i+=bs){
+      const lc=new Int16Array(Math.min(bs,buf.length-i));
+      const rc=new Int16Array(lc.length);
+      for(let j=0;j<lc.length;j++){lc[j]=i16(L[i+j]);rc[j]=i16(R[i+j]);}
+      const d=nc>1?enc.encodeBuffer(lc,rc):enc.encodeBuffer(lc);
+      if(d.length>0)mp3.push(new Int8Array(d));
+    }
+    const f=enc.flush();if(f.length>0)mp3.push(new Int8Array(f));
+    res(new Blob(mp3,{type:'audio/mp3'}));
+  });
+}
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function startOver(){
+  vocalBlob=null;enhBlob=null;beatBlob=null;mixedBuf=null;
+  document.getElementById('s1Next').disabled=true;
+  document.getElementById('s2Next').disabled=true;
+  document.getElementById('s3Next').disabled=true;
+  document.getElementById('enhBtn').disabled=false;
+  document.getElementById('mixBtn').disabled=false;
+  document.getElementById('trimBtn').disabled=false;
+  document.getElementById('enhCompare').style.display='none';
+  document.getElementById('enhProg').classList.remove('show');
+  document.getElementById('mixProg').classList.remove('show');
+  document.getElementById('trimProg').classList.remove('show');
+  document.getElementById('vChip').classList.remove('show');
+  document.getElementById('bChip').classList.remove('show');
+  document.getElementById('recZone').className='record-zone';
+  document.getElementById('recTitle').textContent='Tap to start recording';
+  document.getElementById('recSub').textContent='Sing close to your mic in a quiet room';
+  goTo(1);
+}
+</script>
+</body>
+</html>
