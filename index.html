@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMA Voice Studio PRO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+:root{--bg:#080A0F;--surface:#0F1219;--card:#141820;--border:#1E2430;--accent:#00E5FF;--accent2:#7B2FFF;--text:#E8EAF0;--muted:#6B7280;--success:#00E096;--error:#FF4D6D;--warn:#FFB800}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+.logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:9px;font-family:'Space Mono',monospace;letter-spacing:1px;color:var(--accent);border:1px solid rgba(0,229,255,.3);padding:3px 8px;border-radius:20px}
+.hero{text-align:center;padding:30px 20px 16px}
+.hero h1{font-size:clamp(22px,7vw,40px);font-weight:700;line-height:1.1;margin-bottom:8px;letter-spacing:-1px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:13px;color:var(--muted);max-width:300px;margin:0 auto;line-height:1.5}
+.waveform{display:flex;align-items:center;justify-content:center;gap:3px;margin:12px auto;height:24px}
+.wave-bar{width:3px;background:linear-gradient(to top,var(--accent2),var(--accent));border-radius:2px;animation:wave 1.2s ease-in-out infinite;opacity:.7}
+.wave-bar:nth-child(1){height:8px;animation-delay:0s}.wave-bar:nth-child(2){height:16px;animation-delay:.1s}.wave-bar:nth-child(3){height:24px;animation-delay:.2s}.wave-bar:nth-child(4){height:18px;animation-delay:.3s}.wave-bar:nth-child(5){height:22px;animation-delay:.4s}.wave-bar:nth-child(6){height:14px;animation-delay:.5s}.wave-bar:nth-child(7){height:20px;animation-delay:.6s}.wave-bar:nth-child(8){height:10px;animation-delay:.7s}
+@keyframes wave{0%,100%{transform:scaleY(.5);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+.container{max-width:600px;margin:0 auto;padding:0 14px 80px}
+
+/* Steps pill nav */
+.steps-nav{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);padding:4px;border-radius:12px;border:1px solid var(--border)}
+.step-pill{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);cursor:default;transition:all .3s;letter-spacing:.5px}
+.step-pill.done{color:var(--success);background:rgba(0,224,150,.08)}
+.step-pill.active{color:#000;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px;display:none;animation:fadeIn .3s ease}
+.card.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.card-desc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+
+/* Big action button */
+.big-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:18px;color:#000;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.big-btn:active{transform:scale(.98)}.big-btn:disabled{opacity:.4;cursor:not-allowed}
+.sec-btn{width:100%;background:transparent;border:1px solid var(--accent);border-radius:12px;padding:14px;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;text-decoration:none}
+.sec-btn:hover{background:rgba(0,229,255,.08)}
+.ghost-btn{width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;padding:13px;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.ghost-btn:hover{border-color:var(--text);color:var(--text)}
+
+/* Record */
+.record-zone{background:var(--surface);border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:10px;transition:all .3s}
+.record-zone.recording{border-color:var(--error);background:rgba(255,77,109,.05)}
+.record-zone.done{border-color:var(--success);background:rgba(0,224,150,.05)}
+.record-icon{font-size:36px;margin-bottom:8px}
+.record-pulse{width:60px;height:60px;border-radius:50%;background:var(--error);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;animation:pulse-rec 1s infinite;display:none}
+.record-zone.recording .record-pulse{display:flex}
+.record-zone.recording .record-icon{display:none}
+@keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.5)}70%{box-shadow:0 0 0 12px rgba(255,77,109,0)}}
+.record-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.record-sub{font-size:12px;color:var(--muted)}
+.record-timer{font-size:28px;font-family:'Space Mono',monospace;color:var(--error);margin:8px 0;display:none}
+.record-zone.recording .record-timer{display:block}
+
+/* Upload */
+.upload-zone{border:1.5px dashed var(--border);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .3s;position:relative;margin-bottom:8px}
+.upload-zone:hover,.upload-zone.filled{border-color:var(--accent);background:rgba(0,229,255,.03)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone p{font-size:12px;color:var(--muted)}
+.upload-zone strong{color:var(--accent)}
+.file-chip{display:none;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.2);border-radius:8px;padding:8px 12px;margin-top:6px}
+.file-chip.show{display:flex}
+.file-chip-name{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Preset grid */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.preset-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.preset-card.active{border-color:var(--accent);background:rgba(0,229,255,.07)}
+.preset-card .picon{font-size:24px;margin-bottom:6px}
+.preset-card .pname{font-size:13px;font-weight:600;margin-bottom:2px}
+.preset-card .pdesc{font-size:10px;color:var(--muted);line-height:1.4}
+.preset-card.active .pname{color:var(--accent)}
+.preset-badge{font-size:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;padding:2px 6px;border-radius:4px;font-weight:700;display:inline-block;margin-bottom:6px}
+
+/* Progress */
+.prog-wrap{background:var(--card);border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:18px;text-align:center;display:none;margin:10px 0}
+.prog-wrap.show{display:block}
+.prog-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.prog-step{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--surface);font-size:12px;color:var(--muted);transition:all .3s}
+.prog-step.active{background:rgba(0,229,255,.08);color:var(--text);border:1px solid rgba(0,229,255,.2)}
+.prog-step.done{background:rgba(0,224,150,.06);color:var(--success);border:1px solid rgba(0,224,150,.15)}
+.prog-step-icon{font-size:16px;width:24px;text-align:center}
+.prog-bar-wrap{background:var(--surface);border-radius:100px;height:4px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;width:0%;transition:width .5s ease}
+
+/* Audio compare */
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.audio-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px}
+.audio-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+.audio-label.enhanced{color:var(--success)}
+audio{width:100%;accent-color:var(--accent)}
+
+/* FX toggles - simple */
+.fx-row{display:flex;flex-direction:column;gap:8px}
+.fx-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:border-color .2s}
+.fx-item.on{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.04)}
+.fx-left{display:flex;align-items:center;gap:10px}
+.fx-emoji{font-size:18px}
+.fx-info .fx-name{font-size:13px;font-weight:600}
+.fx-info .fx-desc{font-size:11px;color:var(--muted)}
+.toggle{width:40px;height:22px;background:var(--border);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(18px)}
+.fx-slider{display:none;padding:8px 14px 12px;background:var(--surface);border:1px solid rgba(0,229,255,.2);border-top:none;border-radius:0 0 10px 10px;margin-top:-8px}
+.fx-slider.show{display:block}
+.slider-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.slider-lbl{font-size:11px;color:var(--muted);width:60px}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.slider-val{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;width:36px;text-align:right}
+
+/* Mix section */
+.mix-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.mix-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.mix-card-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;margin-bottom:10px}
+.vol-display{font-size:22px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;text-align:center;margin:6px 0}
+
+/* Trim */
+.trim-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin:10px 0}
+canvas{width:100%;height:56px;display:block;border-radius:6px;margin-bottom:10px}
+.trim-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.trim-lbl{font-size:11px;color:var(--muted);width:36px}
+.trim-val{font-size:11px;font-family:'Space Mono',monospace;width:40px;text-align:right}
+.trim-val.start{color:var(--success)}
+.trim-val.end{color:var(--error)}
+.quick-trims{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.qt-btn{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px;font-size:11px;color:var(--muted);cursor:pointer;min-width:60px;text-align:center}
+.qt-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Result */
+.result-wrap{background:rgba(0,224,150,.05);border:1px solid rgba(0,224,150,.2);border-radius:14px;padding:16px;margin:10px 0}
+.result-top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.result-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.result-title{font-size:14px;font-weight:700;color:var(--success)}
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.fmt-btn{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--muted);transition:all .2s}
+.fmt-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07);font-weight:700}
+.info{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.1);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}
+.info strong{color:var(--text)}
+.tabs{display:flex;gap:5px;margin-bottom:10px}
+.tab{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;text-align:center;font-size:11px;color:var(--muted);transition:all .2s}
+.tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07)}
+.tp{display:none}.tp.active{display:block}
+/* FL Studio Track Arranger */
+.fl-track{background:var(--surface);border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:14px;transition:border-color .2s}
+.fl-track-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.fl-track-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fl-track-name{font-size:13px;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif}
+.fl-track-meta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px}
+.fl-wave{width:100%;height:52px;display:block;border-radius:8px;background:#090912;margin-bottom:10px}
+.fl-solo-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--accent);cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.fl-solo-btn.playing{background:rgba(0,229,255,.25);border-color:var(--accent)}
+.fl-mute-btn{background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--error);cursor:pointer;font-family:'Space Mono',monospace}
+.fl-mute-btn.muted{background:rgba(255,80,80,.3);border-color:var(--error);opacity:.7}
+.fl-controls{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
+.fl-ctrl-row{display:flex;align-items:center;gap:8px}
+.fl-lbl{font-size:10px;color:var(--muted);width:44px;flex-shrink:0;font-family:'Space Mono',monospace}
+.fl-slider{flex:1;height:4px}
+.fl-val{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);width:38px;text-align:right;flex-shrink:0}
+.fl-quick{display:flex;gap:5px}
+.fl-qt{flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px;font-size:10px;color:var(--muted);cursor:pointer;text-align:center;font-family:'Space Mono',monospace}
+.fl-qt:hover{border-color:var(--accent);color:var(--accent)}
+footer{text-align:center;padding:16px;font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px}
+footer span{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">AMA<span>/</span>VOICE</div>
+  <div class="badge">PRO STUDIO</div>
+</header>
+<div class="hero">
+  <h1>Record.<br><em>Sound Pro.</em></h1>
+  <p>AI-powered vocal enhancement, beat mixing, trimming — all in one tap.</p>
+  <div class="waveform">
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Step nav -->
+  <div class="steps-nav" style="overflow-x:auto">
+    <div class="step-pill active" id="sp1">🎙</div>
+    <div class="step-pill" id="sp2">✨</div>
+    <div class="step-pill" id="sp3">✂</div>
+    <div class="step-pill" id="sp4">🥁</div>
+    <div class="step-pill" id="sp5">🎛</div>
+    <div class="step-pill" id="sp6">🤖</div>
+    <div class="step-pill" id="sp7">⬇</div>
+  </div>
+
+  <!-- STEP 1: Record/Upload Vocals -->
+  <div class="card show" id="s1">
+    <div class="card-title">🎙️ Record your vocals</div>
+    <div class="card-desc">Sing or rap your lyrics. We'll handle all the professional editing automatically.</div>
+    <div class="tabs">
+      <div class="tab active" onclick="st(1,'rec')">🎙️ Record</div>
+      <div class="tab" onclick="st(1,'up')">📁 Upload</div>
+    </div>
+    <div class="tp active" id="t1-rec">
+      <div class="record-zone" id="recZone" onclick="toggleRecord()">
+        <div class="record-pulse">🎤</div>
+        <div class="record-icon">🎙️</div>
+        <div class="record-timer" id="recTimer">0:00</div>
+        <div class="record-title" id="recTitle">Tap to start recording</div>
+        <div class="record-sub" id="recSub">Sing close to your mic in a quiet room</div>
+      </div>
+    </div>
+    <div class="tp" id="t1-up">
+      <div class="upload-zone" id="vUpZone">
+        <input type="file" id="vFile" accept="audio/*" onchange="onVocalFile(this)">
+        <div style="font-size:28px;margin-bottom:6px">🎤</div>
+        <p><strong>Tap to upload</strong> your vocal recording</p>
+        <p style="font-size:10px;margin-top:3px">MP3, WAV, AAC, M4A supported</p>
+      </div>
+      <div class="file-chip" id="vChip"><span>🎵</span><span class="file-chip-name" id="vChipName"></span><span style="color:var(--success)">✓</span></div>
+    </div>
+    <div class="info">💡 <strong>Pro tip:</strong> Record in a bathroom or small room. Turn off fans and AC. Sing at natural speaking volume — not too loud.</div>
+    <button class="big-btn" id="s1Next" onclick="goTo(2)" disabled>Enhance My Vocals →</button>
+  </div>
+
+  <!-- STEP 2: Auto Enhance -->
+  <div class="card" id="s2">
+    <div class="card-title">✨ Professional Enhancement</div>
+    <div class="card-desc">Choose your sound. One tap makes your voice radio-ready automatically.</div>
+
+    <div class="preset-grid">
+      <div class="preset-card active" id="p-vocal" onclick="pickPreset('vocal')">
+        <div class="preset-badge">RECOMMENDED</div>
+        <div class="picon">🎤</div>
+        <div class="pname">Vocal Clean</div>
+        <div class="pdesc">Noise removal, warmth boost, professional compression</div>
+      </div>
+      <div class="preset-card" id="p-rap" onclick="pickPreset('rap')">
+        <div class="picon">🔥</div>
+        <div class="pname">Rap / Trap</div>
+        <div class="pdesc">Punchy attack, crisp highs, hard compression</div>
+      </div>
+      <div class="preset-card" id="p-afro" onclick="pickPreset('afro')">
+        <div class="picon">🌍</div>
+        <div class="pname">Afrobeats</div>
+        <div class="pdesc">Warm, bright, smooth radio-ready sound</div>
+      </div>
+      <div class="preset-card" id="p-nf" onclick="pickPreset('nf')">
+        <div class="picon">🖤</div>
+        <div class="pname">NF / Emo Rap</div>
+        <div class="pdesc">Raw, intimate, deep — minimal processing</div>
+      </div>
+      <div class="preset-card" id="p-rnb" onclick="pickPreset('rnb')">
+        <div class="picon">🎶</div>
+        <div class="pname">R&B / Soul</div>
+        <div class="pdesc">Silky smooth, lush reverb, warm low-mids</div>
+      </div>
+      <div class="preset-card" id="p-pop" onclick="pickPreset('pop')">
+        <div class="picon">⭐</div>
+        <div class="pname">Pop Radio</div>
+        <div class="pdesc">Bright, punchy, compressed — chart-ready</div>
+      </div>
+      <div class="preset-card" id="p-gospel" onclick="pickPreset('gospel')">
+        <div class="picon">🙏</div>
+        <div class="pname">Gospel / Choir</div>
+        <div class="pdesc">Full body, cathedral reverb, natural warmth</div>
+      </div>
+      <div class="preset-card" id="p-podcast" onclick="pickPreset('podcast')">
+        <div class="picon">🎙️</div>
+        <div class="pname">Podcast / Voice</div>
+        <div class="pdesc">Crisp speech clarity, tight gate, no mud</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--accent2);letter-spacing:1px;margin:14px 0 8px;display:flex;align-items:center;gap:6px">
+      <span style="flex:1;height:1px;background:linear-gradient(to right,var(--accent2),transparent)"></span>
+      🎛 BANDLAB PRESETS
+      <span style="flex:1;height:1px;background:linear-gradient(to left,var(--accent2),transparent)"></span>
+    </div>
+    <div class="preset-grid">
+      <div class="preset-card" id="p-bl-club" onclick="pickPreset('bl-club')">
+        <div class="preset-badge" style="background:linear-gradient(135deg,var(--accent2),#5500cc)">BANDLAB</div>
+        <div class="picon">🏆</div>
+        <div class="pname">BL: Club Banger</div>
+        <div class="pdesc">Heavy sidechain feel, loud master, club-ready punch</div>
+      </div>
+      <div class="preset-card" id="p-bl-drill" onclick="pickPreset('bl-drill')">
+        <div class="preset-badge" style="background:linear-gradient(135deg,var(--accent2),#5500cc)">BANDLAB</div>
+        <div class="picon">🔱</div>
+        <div class="pname">BL: UK Drill</div>
+        <div class="pdesc">Dark, deep sub presence, aggressive hi-hat clarity</div>
+      </div>
+      <div class="preset-card" id="p-bl-smooth" onclick="pickPreset('bl-smooth')">
+        <div class="preset-badge" style="background:linear-gradient(135deg,var(--accent2),#5500cc)">BANDLAB</div>
+        <div class="picon">🌊</div>
+        <div class="pname">BL: Smooth Vocals</div>
+        <div class="pdesc">BandLab's signature silky clean vocal chain</div>
+      </div>
+      <div class="preset-card" id="p-bl-hiphop" onclick="pickPreset('bl-hiphop')">
+        <div class="preset-badge" style="background:linear-gradient(135deg,var(--accent2),#5500cc)">BANDLAB</div>
+        <div class="picon">🎯</div>
+        <div class="pname">BL: Hip-Hop Pro</div>
+        <div class="pdesc">Studio-quality hip-hop chain, Auto-Tune warmth</div>
+      </div>
+    </div>
+
+    <!-- Optional FX (collapsed by default) -->
+    <details style="margin-bottom:12px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
+        <span>⚙️</span> <span>Optional effects (advanced)</span>
+      </summary>
+      <div class="fx-row" style="margin-top:10px">
+        <div class="fx-item" id="fxiReverb">
+          <div class="fx-left"><span class="fx-emoji">🏛️</span><div class="fx-info"><div class="fx-name">Reverb</div><div class="fx-desc">Room / space sound</div></div></div>
+          <button class="toggle" id="togReverb" onclick="toggleFX('Reverb')"></button>
+        </div>
+        <div class="fx-slider" id="slReverb">
+          <div class="slider-row"><span class="slider-lbl">Room size</span><input type="range" id="reverbRoom" min="0.1" max="0.99" step="0.01" value="0.4" oninput="sv('reverbRoomV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="reverbRoomV">0.40</span></div>
+          <div class="slider-row"><span class="slider-lbl">Mix amount</span><input type="range" id="reverbWet" min="0.05" max="0.5" step="0.01" value="0.2" oninput="sv('reverbWetV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="reverbWetV">0.20</span></div>
+        </div>
+        <div class="fx-item" id="fxiEcho">
+          <div class="fx-left"><span class="fx-emoji">🔁</span><div class="fx-info"><div class="fx-name">Echo / Delay</div><div class="fx-desc">Repeating echo effect</div></div></div>
+          <button class="toggle" id="togEcho" onclick="toggleFX('Echo')"></button>
+        </div>
+        <div class="fx-slider" id="slEcho">
+          <div class="slider-row"><span class="slider-lbl">Delay time</span><input type="range" id="echoDelay" min="0.1" max="0.8" step="0.05" value="0.25" oninput="sv('echoDelayV',parseFloat(this.value).toFixed(2)+'s')"><span class="slider-val" id="echoDelayV">0.25s</span></div>
+          <div class="slider-row"><span class="slider-lbl">Feedback</span><input type="range" id="echoFeedback" min="0.1" max="0.5" step="0.01" value="0.25" oninput="sv('echoFeedbackV',parseFloat(this.value).toFixed(2))"><span class="slider-val" id="echoFeedbackV">0.25</span></div>
+        </div>
+        <div class="fx-item" id="fxiPitch">
+          <div class="fx-left"><span class="fx-emoji">🎵</span><div class="fx-info"><div class="fx-name">Pitch Shift</div><div class="fx-desc">Raise or lower your pitch</div></div></div>
+          <button class="toggle" id="togPitch" onclick="toggleFX('Pitch')"></button>
+        </div>
+        <div class="fx-slider" id="slPitch">
+          <div class="slider-row"><span class="slider-lbl">Semitones</span><input type="range" id="pitchSt" min="-6" max="6" step="1" value="0" oninput="sv('pitchStV',(this.value>0?'+':'')+this.value+' st')"><span class="slider-val" id="pitchStV">0 st</span></div>
+        </div>
+
+        <!-- AUTO-TUNE -->
+        <div class="fx-item" id="fxiAutoTune" style="border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.03)">
+          <div class="fx-left">
+            <span class="fx-emoji">🎹</span>
+            <div class="fx-info">
+              <div class="fx-name" style="color:var(--accent)">Auto-Tune</div>
+              <div class="fx-desc">Pitch correction — natural or T-Pain style</div>
+            </div>
+          </div>
+          <button class="toggle" id="togAutoTune" onclick="toggleFX('AutoTune')"></button>
+        </div>
+        <div class="fx-slider" id="slAutoTune">
+          <div class="slider-row" style="margin-top:8px">
+            <span class="slider-lbl">Key</span>
+            <select id="atKey" style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px">
+              <option value="0">C</option><option value="1">C#</option><option value="2">D</option>
+              <option value="3">D#</option><option value="4">E</option><option value="5">F</option>
+              <option value="6">F#</option><option value="7">G</option><option value="8">G#</option>
+              <option value="9">A</option><option value="10">A#</option><option value="11">B</option>
+            </select>
+          </div>
+          <div class="slider-row" style="margin-top:6px">
+            <span class="slider-lbl">Scale</span>
+            <select id="atScale" style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px">
+              <option value="major">Major</option>
+              <option value="minor">Minor</option>
+              <option value="chromatic">Chromatic (all notes)</option>
+              <option value="pentatonic">Pentatonic</option>
+            </select>
+          </div>
+          <div class="slider-row" style="margin-top:6px">
+            <span class="slider-lbl">Speed</span>
+            <input type="range" id="atSpeed" min="1" max="10" step="1" value="5" oninput="sv('atSpeedV',this.value==10?'T-Pain':this.value<=3?'Natural':this.value<=6?'Medium':'Hard')">
+            <span class="slider-val" id="atSpeedV">Medium</span>
+          </div>
+          <div class="slider-row" style="margin-top:6px">
+            <span class="slider-lbl">Amount</span>
+            <input type="range" id="atAmount" min="0.1" max="1.0" step="0.05" value="0.7" oninput="sv('atAmountV',Math.round(this.value*100)+'%')">
+            <span class="slider-val" id="atAmountV">70%</span>
+          </div>
+          <div style="font-size:10px;color:var(--accent2);margin-top:8px;padding:6px;background:rgba(123,47,255,.08);border-radius:6px">
+            💡 Uses PSOLA + YIN pitch detection — same algorithm as pro Auto-Tune software. Speed 10 = T-Pain · Speed 1–3 = invisible natural correction
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="prog-wrap" id="enhProg">
+      <div class="prog-steps" id="enhSteps">
+        <div class="prog-step" id="ps1"><span class="prog-step-icon">🔇</span>Removing background noise...</div>
+        <div class="prog-step" id="ps2"><span class="prog-step-icon">💨</span>Cleaning breaths & air sounds...</div>
+        <div class="prog-step" id="ps3"><span class="prog-step-icon">🎚️</span>Applying EQ & presence boost...</div>
+        <div class="prog-step" id="ps4"><span class="prog-step-icon">💪</span>Compressing & balancing...</div>
+        <div class="prog-step" id="ps5"><span class="prog-step-icon">✨</span>Polishing & normalizing...</div>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" id="enhBar"></div></div>
+    </div>
+
+    <div id="enhCompare" style="display:none">
+      <div class="compare-wrap">
+        <div class="audio-card"><div class="audio-label">BEFORE</div><audio id="rawAudio" controls></audio></div>
+        <div class="audio-card"><div class="audio-label enhanced">AFTER ✓</div><audio id="enhAudio" controls></audio></div>
+      </div>
+    </div>
+
+    <button class="big-btn" id="enhBtn" onclick="enhanceVocal()">✨ Enhance My Vocals</button>
+    <button class="big-btn" id="s2Next" onclick="goTo(4)" disabled style="background:linear-gradient(135deg,var(--success),#009955)">Next — Upload Beat 🥁 →</button>
+    <button class="ghost-btn" onclick="skipEnh()">Skip — use raw vocal</button>
+  </div>
+
+  <!-- STEP 3: Arrange (FL Studio Mobile style dual-track) -->
+  <div class="card" id="s3">
+    <div class="card-title">✂️ Arrange Tracks</div>
+    <div class="card-desc">Trim and position each track independently — like FL Studio Mobile. Mixing happens in Step 5.</div>
+
+    <!-- VOCAL TRACK -->
+    <div class="fl-track" id="flVocalTrack">
+      <div class="fl-track-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="fl-track-dot" style="background:var(--accent)"></div>
+          <div>
+            <div class="fl-track-name">🎤 VOCAL</div>
+            <div class="fl-track-meta" id="vocalMeta">Not loaded</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="fl-solo-btn" id="vocalSoloBtn" onclick="soloPreview('vocal')">▶ Solo</button>
+          <button class="fl-mute-btn" id="vocalMuteBtn" onclick="toggleMute('vocal')">M</button>
+        </div>
+      </div>
+      <canvas id="vocalWave" class="fl-wave" height="52"></canvas>
+      <div class="fl-controls">
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">▶ Start</span>
+          <input type="range" class="fl-slider" id="vTrimStart" min="0" max="100" step="0.1" value="0" oninput="onFlTrim('vocal')" style="accent-color:var(--accent)">
+          <span class="fl-val" id="vTrimStartV">0.0s</span>
+        </div>
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">⏹ End</span>
+          <input type="range" class="fl-slider" id="vTrimEnd" min="0" max="100" step="0.1" value="100" oninput="onFlTrim('vocal')" style="accent-color:var(--error)">
+          <span class="fl-val" id="vTrimEndV">0.0s</span>
+        </div>
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">⏩ Offset</span>
+          <input type="range" class="fl-slider" id="vOffset" min="0" max="30" step="0.1" value="0" oninput="onFlOffset('vocal')" style="accent-color:#ffaa00">
+          <span class="fl-val" id="vOffsetV">0.0s</span>
+        </div>
+      </div>
+      <div class="fl-quick">
+        <div class="fl-qt" onclick="flQuick('vocal',0,30)">30s</div>
+        <div class="fl-qt" onclick="flQuick('vocal',0,60)">60s</div>
+        <div class="fl-qt" onclick="flQuick('vocal',0,15)">15s</div>
+        <div class="fl-qt" onclick="flResetOffset('vocal')">Reset</div>
+      </div>
+    </div>
+
+    <!-- BEAT TRACK -->
+    <div class="fl-track" id="flBeatTrack" style="border-color:rgba(123,47,255,.3);margin-top:12px">
+      <div class="fl-track-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="fl-track-dot" style="background:var(--accent2)"></div>
+          <div>
+            <div class="fl-track-name">🥁 BEAT</div>
+            <div class="fl-track-meta" id="beatMeta">Not loaded</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="fl-solo-btn" id="beatSoloBtn" onclick="soloPreview('beat')">▶ Solo</button>
+          <button class="fl-mute-btn" id="beatMuteBtn" onclick="toggleMute('beat')">M</button>
+        </div>
+      </div>
+      <canvas id="beatWave" class="fl-wave" height="52"></canvas>
+      <div class="fl-controls">
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">▶ Start</span>
+          <input type="range" class="fl-slider" id="bTrimStart" min="0" max="100" step="0.1" value="0" oninput="onFlTrim('beat')" style="accent-color:var(--accent2)">
+          <span class="fl-val" id="bTrimStartV">0.0s</span>
+        </div>
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">⏹ End</span>
+          <input type="range" class="fl-slider" id="bTrimEnd" min="0" max="100" step="0.1" value="100" oninput="onFlTrim('beat')" style="accent-color:var(--error)">
+          <span class="fl-val" id="bTrimEndV">0.0s</span>
+        </div>
+        <div class="fl-ctrl-row">
+          <span class="fl-lbl">⏩ Offset</span>
+          <input type="range" class="fl-slider" id="bOffset" min="0" max="30" step="0.1" value="0" oninput="onFlOffset('beat')" style="accent-color:#ffaa00">
+          <span class="fl-val" id="bOffsetV">0.0s</span>
+        </div>
+      </div>
+      <div class="fl-quick">
+        <div class="fl-qt" onclick="flQuick('beat',0,30)">30s</div>
+        <div class="fl-qt" onclick="flQuick('beat',0,60)">60s</div>
+        <div class="fl-qt" onclick="flQuick('beat',0,15)">15s</div>
+        <div class="fl-qt" onclick="flResetOffset('beat')">Reset</div>
+      </div>
+    </div>
+
+    <!-- arrangement preview -->
+    <div style="margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px">
+      <div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;margin-bottom:8px">ARRANGEMENT TIMELINE</div>
+      <canvas id="arrangeTimeline" height="48" style="width:100%;border-radius:6px;background:#0a0a0f"></canvas>
+      <div style="display:flex;justify-content:space-between;margin-top:6px">
+        <span style="font-size:10px;color:var(--accent)">🎤 Vocal</span>
+        <span style="font-size:10px;color:var(--accent2)">🥁 Beat</span>
+        <span style="font-size:10px;color:var(--muted)" id="timelineDur">Total: —</span>
+      </div>
+    </div>
+
+    <div class="prog-wrap" id="arrangeProg" style="margin-top:10px">
+      <div class="prog-bar-wrap"><div class="prog-bar" id="arrangeBar"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="arrangeLabel">Processing tracks...</div>
+    </div>
+
+    <button class="big-btn" onclick="applyArrange()" id="arrangeBtn" style="margin-top:12px">✅ Confirm Arrangement → Mix</button>
+    <button class="ghost-btn" onclick="skipArrange()">Skip — use tracks as-is</button>
+  </div>
+
+  <!-- STEP 4: Beat -->
+  <div class="card" id="s4">
+    <div class="card-title">🥁 Upload your beat</div>
+    <div class="card-desc">Upload your instrumental. Then you'll arrange both tracks independently.</div>
+    <div class="upload-zone" id="bUpZone">
+      <input type="file" id="bFile" accept="audio/*" onchange="onBeatFile(this)">
+      <div style="font-size:32px;margin-bottom:6px">🥁</div>
+      <p><strong>Tap to upload</strong> your beat / instrumental</p>
+      <p style="font-size:10px;margin-top:3px">MP3, WAV supported</p>
+    </div>
+    <div class="file-chip" id="bChip"><span>🎵</span><span class="file-chip-name" id="bChipName"></span><span style="color:var(--success)">✓</span></div>
+    <div class="info">💡 No beat? Go to <strong>suno.com</strong> → generate one → download → upload here.</div>
+    <button class="big-btn" id="s3Next" onclick="goToArrange()" disabled style="margin-top:12px">Next — Arrange Tracks ✂️ →</button>
+  </div>
+
+  <!-- STEP 5: Mix -->
+  <div class="card" id="s5">
+    <div class="card-title">🎛️ Mix your song</div>
+    <div class="card-desc">Set vocal and beat volumes. AI has already set smart defaults for you.</div>
+
+    <div class="mix-grid">
+      <div class="mix-card">
+        <div class="mix-card-label">🎤 VOCALS</div>
+        <div class="vol-display" id="vVolDisp">85%</div>
+        <input type="range" id="vVol" min="0" max="150" value="85" style="width:100%;accent-color:var(--accent)" oninput="document.getElementById('vVolDisp').textContent=this.value+'%'">
+      </div>
+      <div class="mix-card">
+        <div class="mix-card-label">🥁 BEAT</div>
+        <div class="vol-display" id="bVolDisp">60%</div>
+        <input type="range" id="bVol" min="0" max="150" value="60" style="width:100%;accent-color:var(--accent2)" oninput="document.getElementById('bVolDisp').textContent=this.value+'%'">
+      </div>
+    </div>
+
+    <details style="margin-bottom:10px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
+        <span>⚙️</span><span>Advanced mix controls</span>
+      </summary>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+        <div class="slider-row"><span class="slider-lbl">Vocal delay</span><input type="range" id="vDelay" min="0" max="8000" step="100" value="0" oninput="sv('vDelayV',(this.value/1000).toFixed(1)+'s')"><span class="slider-val" id="vDelayV">0.0s</span></div>
+        <div class="slider-row"><span class="slider-lbl">Vocal pan</span><input type="range" id="vPan" min="-1" max="1" step="0.01" value="0" oninput="panLbl('vPanV',this.value)"><span class="slider-val" id="vPanV">C</span></div>
+        <div class="slider-row"><span class="slider-lbl">Beat pan</span><input type="range" id="bPan" min="-1" max="1" step="0.01" value="0" oninput="panLbl('bPanV',this.value)"><span class="slider-val" id="bPanV">C</span></div>
+        <div class="slider-row"><span class="slider-lbl">Master vol</span><input type="range" id="mastVol" min="0.5" max="2.0" step="0.05" value="1.0" oninput="sv('mastVolV',parseFloat(this.value).toFixed(1)+'x')"><span class="slider-val" id="mastVolV">1.0x</span></div>
+      </div>
+    </details>
+
+    <div class="prog-wrap" id="mixProg">
+      <div class="prog-steps">
+        <div class="prog-step" id="mps1"><span class="prog-step-icon">🎛️</span>Building effects chain...</div>
+        <div class="prog-step" id="mps2"><span class="prog-step-icon">🎚️</span>Mixing vocals & beat...</div>
+        <div class="prog-step" id="mps3"><span class="prog-step-icon">🔊</span>Mastering & normalizing...</div>
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar" id="mixBar"></div></div>
+    </div>
+
+    <button class="big-btn" onclick="mixTracks()" id="mixBtn">🎛️ Mix & Master My Song</button>
+  </div>
+
+  <!-- STEP 6: AI Song Editor -->
+  <div class="card" id="s6">
+    <div class="card-title">🤖 AI Song Editor</div>
+    <div class="card-desc">Tell the AI what kind of song this is. It will listen and give you professional editing advice.</div>
+
+    <div style="background:var(--surface);border:1px solid rgba(123,47,255,.3);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:10px">TELL THE AI ABOUT YOUR SONG</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Genre</div>
+          <select id="aiGenre" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:12px">
+            <option>Afrobeats</option><option>Afropop</option><option>Rap / Trap</option><option>R&B / Soul</option>
+            <option>Hip-Hop</option><option>UK Drill</option><option>Gospel</option><option>Pop</option>
+            <option>Amapiano</option><option>Dancehall</option><option>Highlife</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Mood</div>
+          <select id="aiMood" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:12px">
+            <option>Hype / Energetic</option><option>Romantic / Love</option><option>Sad / Emotional</option>
+            <option>Motivational</option><option>Party / Fun</option><option>Spiritual</option><option>Aggressive</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Describe your song (optional)</div>
+      <textarea id="aiDesc" placeholder="e.g. It's a love song for my girlfriend, I want it to sound professional like a Burna Boy track..." style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:12px;resize:none;height:70px;font-family:'Space Grotesk',sans-serif;line-height:1.5"></textarea>
+    </div>
+
+    <button class="big-btn" onclick="runAIEditor()" id="aiBtn">🤖 Get AI Editing Advice</button>
+
+    <div id="aiLoading" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:28px;margin-bottom:8px;animation:wave 1s infinite">🤖</div>
+      <div style="font-size:13px;color:var(--accent)">AI is analyzing your song...</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Checking mix balance, EQ, and arrangement</div>
+    </div>
+
+    <div id="aiResult" style="display:none;margin-top:12px">
+      <div style="background:rgba(123,47,255,.08);border:1px solid rgba(123,47,255,.3);border-radius:12px;padding:14px">
+        <div style="font-size:12px;font-family:'Space Mono',monospace;color:var(--accent2);letter-spacing:1px;margin-bottom:10px">🤖 AI PRODUCER FEEDBACK</div>
+        <div id="aiText" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="ghost-btn" onclick="runAIEditor()" style="margin-bottom:0">🔄 Ask Again / Different Angle</button>
+      </div>
+    </div>
+
+    <button class="big-btn" onclick="goTo(7)" style="margin-top:12px;background:linear-gradient(135deg,var(--success),#009955)">Export My Song ⬇️</button>
+    <button class="ghost-btn" onclick="goTo(7)">Skip AI — go to export</button>
+  </div>
+
+  <!-- STEP 7: Export -->
+  <div class="card" id="s7">
+    <div class="card-title">🎵 Your song is ready!</div>
+    <div class="card-desc">Listen, then download in your preferred format.</div>
+    <div class="result-wrap">
+      <div class="result-top"><div class="result-dot"></div><div class="result-title">Mixed & mastered professionally ✅</div></div>
+      <audio id="finalAudio" controls style="width:100%;accent-color:var(--accent)"></audio>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin:10px 0 6px;font-family:'Space Mono',monospace;letter-spacing:.5px">EXPORT FORMAT</div>
+    <div class="fmt-grid">
+      <div class="fmt-btn active" id="fmtWav" onclick="selFmt('wav')">🎵 WAV<div style="font-size:10px;color:var(--muted);margin-top:2px">Lossless quality</div></div>
+      <div class="fmt-btn" id="fmtMp3" onclick="selFmt('mp3')">📱 MP3<div style="font-size:10px;color:var(--muted);margin-top:2px">Smaller file size</div></div>
+    </div>
+    <a class="big-btn" id="dlBtn" download="AMA-Voice-Studio.wav" style="text-decoration:none">⬇️ Download Song</a>
+    <button class="sec-btn" onclick="goTo(5)">🎛️ Remix</button>
+    <button class="sec-btn" onclick="goTo(3)">✂️ Re-Arrange Tracks</button>
+    <button class="ghost-btn" onclick="startOver()">🔄 Start New Song</button>
+    <div class="info" style="margin-top:10px">🚀 Share on <strong>Audiomack</strong>, <strong>TikTok</strong> or <strong>Instagram Reels</strong> to go viral!</div>
+  </div>
+</div>
+<footer>Built by <span>AMA AUTOMATIONS</span> · Lagos, Nigeria</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let vocalBlob=null, enhBlob=null, beatBlob=null, mixedBuf=null, vocalTrimBuf=null;
+let selectedPreset='vocal', selectedFmt='wav';
+let fxOn={Reverb:false,Echo:false,Pitch:false,AutoTune:false};
+let mediaRec=null, recChunks=[], isRec=false, recTimer=null, recSecs=0;
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function goTo(n){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('show'));
+  document.getElementById('s'+n).classList.add('show');
+  ['sp1','sp2','sp3','sp4','sp5','sp6','sp7'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.className='step-pill'+(i+1<n?' done':i+1===n?' active':'');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function st(s,tab){
+  document.querySelectorAll('#s'+s+' .tab').forEach((t,i)=>t.classList.toggle('active',(tab==='rec'&&i===0)||(tab==='up'&&i===1)));
+  document.querySelectorAll('#s'+s+' .tp').forEach((p,i)=>p.classList.toggle('active',(tab==='rec'&&i===0)||(tab==='up'&&i===1)));
+}
+
+// ─── Recording ───────────────────────────────────────────────────────────────
+async function toggleRecord(){
+  if(!isRec){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:44100}});
+      recChunks=[];
+      const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+      mediaRec=new MediaRecorder(stream,{mimeType});
+      mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data)};
+      mediaRec.onstop=()=>{
+        vocalBlob=new Blob(recChunks,{type:'audio/webm'});
+        const z=document.getElementById('recZone');
+        z.className='record-zone done';
+        document.getElementById('recTitle').textContent='✅ Recording saved ('+recSecs+'s)';
+        document.getElementById('recSub').textContent='Tap again to re-record';
+        document.getElementById('s1Next').disabled=false;
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      mediaRec.start(100); isRec=true; recSecs=0;
+      document.getElementById('recZone').className='record-zone recording';
+      document.getElementById('recTitle').textContent='Recording... tap to stop';
+      document.getElementById('recSub').textContent='';
+      recTimer=setInterval(()=>{
+        recSecs++;
+        const m=Math.floor(recSecs/60),s=recSecs%60;
+        document.getElementById('recTimer').textContent=m+':'+(s<10?'0':'')+s;
+      },1000);
+    }catch(e){
+      document.getElementById('recTitle').textContent='❌ Mic denied — use Upload tab';
+    }
+  }else{
+    mediaRec.stop(); isRec=false; clearInterval(recTimer);
+  }
+}
+
+function onVocalFile(inp){
+  const f=inp.files[0]; if(!f)return;
+  vocalBlob=f;
+  document.getElementById('vChipName').textContent=f.name;
+  document.getElementById('vChip').classList.add('show');
+  document.getElementById('vUpZone').classList.add('filled');
+  document.getElementById('s1Next').disabled=false;
+}
+
+function onBeatFile(inp){
+  const f=inp.files[0]; if(!f)return;
+  beatBlob=f;
+  document.getElementById('bChipName').textContent=f.name;
+  document.getElementById('bChip').classList.add('show');
+  document.getElementById('bUpZone').classList.add('filled');
+  document.getElementById('s3Next').disabled=false;
+}
+
+// ─── Preset selection ─────────────────────────────────────────────────────────
+function pickPreset(p){
+  selectedPreset=p;
+  ['vocal','rap','afro','nf','rnb','pop','gospel','podcast','bl-club','bl-drill','bl-smooth','bl-hiphop'].forEach(k=>{
+    const el=document.getElementById('p-'+k);
+    if(el) el.classList.toggle('active',k===p);
+  });
+}
+
+// ─── FX toggles ───────────────────────────────────────────────────────────────
+function toggleFX(name){
+  fxOn[name]=!fxOn[name];
+  document.getElementById('tog'+name).classList.toggle('on',fxOn[name]);
+  document.getElementById('fxi'+name).classList.toggle('on',fxOn[name]);
+  document.getElementById('sl'+name).classList.toggle('show',fxOn[name]);
+}
+
+function sv(id,val){if(document.getElementById(id))document.getElementById(id).textContent=val;}
+function panLbl(id,v){const n=parseFloat(v);document.getElementById(id).textContent=n===0?'C':n<0?'L'+Math.abs(Math.round(n*100)):'R'+Math.round(n*100);}
+
+// ─── Presets config ───────────────────────────────────────────────────────────
+const PRESETS={
+  vocal:{
+    hpFreq:100,lpFreq:16000,
+    lowCut:-3,lowCutF:200,
+    midBoost:4,midBoostF:3000,
+    hiBoost:3,hiBoostF:10000,
+    deEss:-4,deEssF:7000,
+    compThresh:-24,compRatio:4,compKnee:6,
+    compAttack:0.004,compRelease:0.2,
+    saturation:0,reverbWet:0.08,reverbDecay:0.4,
+    outputGain:1.3,breathGate:0.03
+  },
+  rap:{
+    hpFreq:120,lpFreq:18000,
+    lowCut:-4,lowCutF:200,
+    midBoost:5,midBoostF:2500,
+    hiBoost:4,hiBoostF:8000,
+    deEss:-5,deEssF:6500,
+    compThresh:-20,compRatio:6,compKnee:4,
+    compAttack:0.002,compRelease:0.15,
+    saturation:20,reverbWet:0.05,reverbDecay:0.3,
+    outputGain:1.4,breathGate:0.04
+  },
+  afro:{
+    hpFreq:80,lpFreq:18000,
+    lowCut:-2,lowCutF:180,
+    midBoost:3,midBoostF:3500,
+    hiBoost:5,hiBoostF:12000,
+    deEss:-3,deEssF:7500,
+    compThresh:-22,compRatio:3,compKnee:8,
+    compAttack:0.005,compRelease:0.25,
+    saturation:10,reverbWet:0.12,reverbDecay:0.5,
+    outputGain:1.3,breathGate:0.025
+  },
+  nf:{
+    hpFreq:90,lpFreq:16000,
+    lowCut:-2,lowCutF:200,
+    midBoost:2,midBoostF:2000,
+    hiBoost:2,hiBoostF:8000,
+    deEss:-3,deEssF:6000,
+    compThresh:-28,compRatio:3,compKnee:10,
+    compAttack:0.006,compRelease:0.3,
+    saturation:0,reverbWet:0.18,reverbDecay:0.6,
+    outputGain:1.2,breathGate:0.02
+  },
+  rnb:{
+    hpFreq:80,lpFreq:17000,
+    lowCut:-1,lowCutF:160,
+    midBoost:3,midBoostF:2800,
+    hiBoost:4,hiBoostF:10000,
+    deEss:-4,deEssF:7000,
+    compThresh:-26,compRatio:3.5,compKnee:8,
+    compAttack:0.006,compRelease:0.28,
+    saturation:8,reverbWet:0.22,reverbDecay:0.65,
+    outputGain:1.3,breathGate:0.025
+  },
+  pop:{
+    hpFreq:110,lpFreq:18000,
+    lowCut:-3,lowCutF:220,
+    midBoost:4,midBoostF:3200,
+    hiBoost:5,hiBoostF:11000,
+    deEss:-5,deEssF:7500,
+    compThresh:-18,compRatio:5,compKnee:5,
+    compAttack:0.003,compRelease:0.15,
+    saturation:12,reverbWet:0.1,reverbDecay:0.35,
+    outputGain:1.45,breathGate:0.035
+  },
+  gospel:{
+    hpFreq:70,lpFreq:17000,
+    lowCut:-1,lowCutF:150,
+    midBoost:2,midBoostF:2500,
+    hiBoost:3,hiBoostF:9000,
+    deEss:-3,deEssF:6500,
+    compThresh:-30,compRatio:2.5,compKnee:12,
+    compAttack:0.007,compRelease:0.35,
+    saturation:5,reverbWet:0.35,reverbDecay:0.9,
+    outputGain:1.25,breathGate:0.02
+  },
+  podcast:{
+    hpFreq:130,lpFreq:14000,
+    lowCut:-5,lowCutF:250,
+    midBoost:5,midBoostF:2000,
+    hiBoost:2,hiBoostF:7000,
+    deEss:-6,deEssF:6500,
+    compThresh:-16,compRatio:7,compKnee:3,
+    compAttack:0.002,compRelease:0.1,
+    saturation:0,
+    reverbWet:0.02,reverbDecay:0.2,
+    outputGain:1.5,
+    breathGate:0.04
+  },
+  'bl-club':{
+    hpFreq:115,lpFreq:18000,
+    lowCut:-3,lowCutF:210,
+    midBoost:5,midBoostF:3000,
+    hiBoost:6,hiBoostF:12000,
+    deEss:-5,deEssF:7200,
+    compThresh:-16,compRatio:6,compKnee:4,
+    compAttack:0.002,compRelease:0.12,
+    saturation:18,
+    reverbWet:0.08,reverbDecay:0.3,
+    outputGain:1.55,
+    breathGate:0.035
+  },
+  'bl-drill':{
+    hpFreq:125,lpFreq:17000,
+    lowCut:-5,lowCutF:180,
+    midBoost:4,midBoostF:2200,
+    hiBoost:3,hiBoostF:9000,
+    deEss:-6,deEssF:6800,
+    compThresh:-19,compRatio:7,compKnee:3,
+    compAttack:0.002,compRelease:0.13,
+    saturation:25,
+    reverbWet:0.06,reverbDecay:0.25,
+    outputGain:1.45,
+    breathGate:0.04
+  },
+  'bl-smooth':{
+    hpFreq:85,lpFreq:17500,
+    lowCut:-2,lowCutF:170,
+    midBoost:3,midBoostF:2800,
+    hiBoost:4,hiBoostF:10500,
+    deEss:-4,deEssF:7000,
+    compThresh:-27,compRatio:3,compKnee:9,
+    compAttack:0.007,compRelease:0.3,
+    saturation:6,
+    reverbWet:0.2,reverbDecay:0.55,
+    outputGain:1.3,
+    breathGate:0.025
+  },
+  'bl-hiphop':{
+    hpFreq:110,lpFreq:18000,
+    lowCut:-4,lowCutF:200,
+    midBoost:5,midBoostF:2600,
+    hiBoost:4,hiBoostF:9500,
+    deEss:-5,deEssF:6800,
+    compThresh:-21,compRatio:5,compKnee:5,
+    compAttack:0.003,compRelease:0.16,
+    saturation:15,
+    reverbWet:0.07,reverbDecay:0.32,
+    outputGain:1.42,
+    breathGate:0.038
+  }
+};
+
+// ─── Professional Auto-Tune Engine (PSOLA + YIN pitch detection) ─────────────
+
+function getScaleNotes(rootSemitone, scaleName){
+  const patterns={
+    major:[0,2,4,5,7,9,11],
+    minor:[0,2,3,5,7,8,10],
+    pentatonic:[0,2,4,7,9],
+    chromatic:[0,1,2,3,4,5,6,7,8,9,10,11]
+  };
+  return (patterns[scaleName]||patterns.major).map(n=>(n+rootSemitone)%12);
+}
+
+function freqToMidi(freq){return 12*Math.log2(freq/440)+69;}
+function midiToFreq(midi){return 440*Math.pow(2,(midi-69)/12);}
+function freqToSemitones(f1,f2){return 12*Math.log2(f2/f1);}
+
+// YIN algorithm — much more accurate than autocorrelation for voice
+function detectPitchYIN(data, sr, minFreq=70, maxFreq=1100){
+  const minPeriod=Math.floor(sr/maxFreq);
+  const maxPeriod=Math.floor(sr/minFreq);
+  const W=Math.min(data.length>>1, 2048);
+  if(W<maxPeriod) return 0;
+
+  // Step 1: difference function
+  const diff=new Float32Array(maxPeriod+1);
+  for(let tau=1;tau<=maxPeriod;tau++){
+    let s=0;
+    for(let j=0;j<W;j++){const d=data[j]-data[j+tau];s+=d*d;}
+    diff[tau]=s;
+  }
+
+  // Step 2: cumulative mean normalized difference
+  const cmnd=new Float32Array(maxPeriod+1);
+  cmnd[0]=1; let runSum=0;
+  for(let tau=1;tau<=maxPeriod;tau++){
+    runSum+=diff[tau];
+    cmnd[tau]=runSum===0?0:diff[tau]*tau/runSum;
+  }
+
+  // Step 3: absolute threshold — find first dip below 0.12
+  const threshold=0.12;
+  let tau=-1;
+  for(let t=minPeriod;t<=maxPeriod;t++){
+    if(cmnd[t]<threshold){
+      // find local minimum around this point
+      while(t+1<=maxPeriod&&cmnd[t+1]<cmnd[t]) t++;
+      tau=t; break;
+    }
+  }
+  if(tau<0){
+    // fallback: global minimum
+    let minV=Infinity;
+    for(let t=minPeriod;t<=maxPeriod;t++){if(cmnd[t]<minV){minV=cmnd[t];tau=t;}}
+    if(minV>0.35) return 0; // unvoiced
+  }
+
+  // Step 4: parabolic interpolation for sub-sample accuracy
+  if(tau>0&&tau<maxPeriod){
+    const a=cmnd[tau-1], b=cmnd[tau], c=cmnd[tau+1];
+    const denom=2*(2*b-a-c);
+    if(denom!==0) tau+=(a-c)/denom;
+  }
+
+  const freq=sr/tau;
+  return (freq>=minFreq&&freq<=maxFreq)?freq:0;
+}
+
+function nearestScaleNote(freq, scaleNotes){
+  if(freq<=0) return freq;
+  const midi=freqToMidi(freq);
+  const noteClass=((Math.round(midi)%12)+12)%12;
+  let bestDist=Infinity, bestNote=noteClass;
+  for(const n of scaleNotes){
+    const dist=Math.min(Math.abs(n-noteClass),12-Math.abs(n-noteClass));
+    if(dist<bestDist){bestDist=dist;bestNote=n;}
+  }
+  const octave=Math.floor(midi/12);
+  let targetMidi=octave*12+bestNote;
+  if(Math.abs(targetMidi-midi)>6) targetMidi+=targetMidi<midi?12:-12;
+  return midiToFreq(targetMidi);
+}
+
+// Hanning window for smooth overlap-add
+function hanningWindow(size){
+  const w=new Float32Array(size);
+  for(let i=0;i<size;i++) w[i]=0.5*(1-Math.cos(2*Math.PI*i/(size-1)));
+  return w;
+}
+
+// Find nearest pitch period boundary (epoch detection)
+function findEpoch(data, startPos, periodSamples, searchRange){
+  const half=Math.floor(searchRange/2);
+  const lo=Math.max(0, startPos-half);
+  const hi=Math.min(data.length-1, startPos+half);
+  // find zero-crossing going positive
+  let bestPos=startPos;
+  let bestCorr=-Infinity;
+  // use local autocorr around expected epoch
+  for(let p=lo;p<=hi;p++){
+    let corr=0;
+    const len=Math.min(periodSamples, data.length-p, data.length-p-periodSamples);
+    if(len<=0) continue;
+    for(let j=0;j<len;j++) corr+=data[p+j]*data[p+j+periodSamples];
+    if(corr>bestCorr){bestCorr=corr;bestPos=p;}
+  }
+  return bestPos;
+}
+
+// Core PSOLA pitch shift — professional time-preserving algorithm
+function psolaShift(inp, sr, pitchRatio, periodSamples){
+  // pitchRatio > 1 = pitch up, < 1 = pitch down
+  // periodSamples = detected pitch period in samples
+  if(Math.abs(pitchRatio-1)<0.001) return inp.slice(); // no shift needed
+
+  const grainSize=Math.round(periodSamples*2); // analysis grain = 2 pitch periods
+  const win=hanningWindow(grainSize);
+  const out=new Float32Array(inp.length);
+  const outNorm=new Float32Array(inp.length);
+
+  // Analysis: hop through input at original pitch periods
+  // Synthesis: place grains at shifted pitch periods
+  const analysisHop=periodSamples;
+  const synthesisHop=Math.round(periodSamples*pitchRatio);
+
+  let analysisMark=0, synthMark=0;
+  const maxIter=Math.ceil(inp.length/analysisHop)+4;
+
+  for(let iter=0;iter<maxIter;iter++){
+    if(analysisMark>=inp.length) break;
+
+    // Find nearest epoch to analysis mark
+    const epochSearch=Math.min(Math.floor(periodSamples*0.5), 32);
+    const epoch=findEpoch(inp, analysisMark, periodSamples, epochSearch);
+
+    // Extract grain
+    const grainStart=epoch-Math.floor(grainSize/2);
+    for(let i=0;i<grainSize;i++){
+      const srcIdx=grainStart+i;
+      if(srcIdx<0||srcIdx>=inp.length) continue;
+      const sample=inp[srcIdx]*win[i];
+      // Place in output at synthesis position
+      const dstIdx=synthMark-Math.floor(grainSize/2)+i;
+      if(dstIdx>=0&&dstIdx<out.length){
+        out[dstIdx]+=sample;
+        outNorm[dstIdx]+=win[i];
+      }
+    }
+
+    analysisMark+=analysisHop;
+    synthMark+=synthesisHop;
+  }
+
+  // Normalize by window accumulation
+  for(let i=0;i<out.length;i++){
+    if(outNorm[i]>0.001) out[i]/=outNorm[i];
+  }
+  return out;
+}
+
+// Full professional Auto-Tune function
+function applyAutoTune(buf, sr, rootKey, scaleName, speed, amount){
+  const scaleNotes=getScaleNotes(rootKey, scaleName);
+  const nc=buf.numberOfChannels;
+
+  // Analysis parameters
+  const analysisFrameSize=2048;   // YIN analysis window
+  const hopSize=128;               // analysis hop — small = high resolution
+  const minPeriod=Math.floor(sr/1100);
+  const maxPeriod=Math.floor(sr/70);
+
+  // Smoothing: speed 1=very slow (natural), speed 10=instant (T-Pain)
+  // Maps to a portamento time in frames
+  const portamentoFrames=Math.max(1, Math.round((11-speed)*sr/hopSize/8));
+
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  const result=ctx.createBuffer(nc, buf.length, sr);
+
+  for(let ch=0;ch<nc;ch++){
+    const inp=buf.getChannelData(ch);
+    const outData=new Float32Array(inp.length);
+    const outNorm=new Float32Array(inp.length);
+
+    // Hanning window for synthesis
+    const synthWinSize=1024;
+    const synthWin=hanningWindow(synthWinSize);
+    const synthHop=synthWinSize>>2; // 75% overlap
+
+    // State: smoothed pitch ratio
+    let smoothedRatio=1.0;
+    let lastDetectedFreq=0;
+    let portaCounter=0;
+    let portaTargetRatio=1.0;
+    let portaStartRatio=1.0;
+
+    for(let pos=0;pos<inp.length;pos+=hopSize){
+      const frameEnd=Math.min(pos+analysisFrameSize, inp.length);
+      const frame=inp.subarray(pos, frameEnd);
+
+      // RMS voicing detection
+      let rms=0;
+      for(let i=0;i<frame.length;i++) rms+=frame[i]*frame[i];
+      rms=Math.sqrt(rms/frame.length);
+      const isVoiced=rms>0.008;
+
+      if(!isVoiced){
+        // Unvoiced: pass through directly
+        for(let i=0;i<hopSize&&pos+i<inp.length;i++){
+          outData[pos+i]+=inp[pos+i];
+          outNorm[pos+i]+=1;
+        }
+        smoothedRatio=1.0;
+        continue;
+      }
+
+      // Detect pitch with YIN
+      const detectedFreq=detectPitchYIN(frame, sr);
+      if(detectedFreq<=0){
+        for(let i=0;i<hopSize&&pos+i<inp.length;i++){
+          outData[pos+i]+=inp[pos+i]; outNorm[pos+i]+=1;
+        }
+        continue;
+      }
+      lastDetectedFreq=detectedFreq;
+
+      // Find target pitch
+      const targetFreq=nearestScaleNote(detectedFreq, scaleNotes);
+      const rawRatio=targetFreq/detectedFreq;
+      // Apply amount (0-1 blend)
+      const wantedRatio=1+(rawRatio-1)*amount;
+
+      // Portamento smoothing (the key to natural-sounding Auto-Tune)
+      if(Math.abs(wantedRatio-portaTargetRatio)>0.005){
+        portaStartRatio=smoothedRatio;
+        portaTargetRatio=wantedRatio;
+        portaCounter=0;
+      }
+      if(speed>=10){
+        // Instant — T-Pain mode
+        smoothedRatio=wantedRatio;
+      } else {
+        portaCounter++;
+        const t=Math.min(1, portaCounter/portamentoFrames);
+        // Ease-in-out curve for musical portamento
+        const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+        smoothedRatio=portaStartRatio+(portaTargetRatio-portaStartRatio)*ease;
+      }
+
+      // PSOLA grain processing for this hop
+      const periodSamples=Math.round(sr/detectedFreq);
+      if(periodSamples<minPeriod||periodSamples>maxPeriod){
+        for(let i=0;i<hopSize&&pos+i<inp.length;i++){
+          outData[pos+i]+=inp[pos+i]; outNorm[pos+i]+=1;
+        }
+        continue;
+      }
+
+      // Extract a grain centered at current pos, sized 2 pitch periods
+      const grainSize=Math.min(periodSamples*2, synthWinSize, inp.length-pos);
+      if(grainSize<4) continue;
+      const gWin=hanningWindow(grainSize);
+      const grain=new Float32Array(grainSize);
+      for(let i=0;i<grainSize;i++){
+        const si=pos-Math.floor(grainSize/2)+i;
+        grain[i]=(si>=0&&si<inp.length?inp[si]:0)*gWin[i];
+      }
+
+      // Resample grain to new pitch (PSOLA: only the grain changes size, output is same hop)
+      // New grain size after pitch shift
+      const newGrainSize=Math.round(grainSize/smoothedRatio);
+      if(newGrainSize<2) continue;
+
+      // Place resampled grain into output with overlap-add
+      const halfNew=Math.floor(newGrainSize/2);
+      for(let i=0;i<newGrainSize;i++){
+        // Source index in original grain (resampled)
+        const srcF=i*smoothedRatio;
+        const srcI=Math.floor(srcF);
+        const frac=srcF-srcI;
+        const a=srcI<grain.length?grain[srcI]:0;
+        const b=srcI+1<grain.length?grain[srcI+1]:0;
+        const sample=(a+(b-a)*frac);
+        const dstI=pos-halfNew+i;
+        if(dstI>=0&&dstI<outData.length){
+          // Windowed overlap-add
+          const envI=i/newGrainSize;
+          const env=0.5*(1-Math.cos(2*Math.PI*envI));
+          outData[dstI]+=sample*env;
+          outNorm[dstI]+=env;
+        }
+      }
+    }
+
+    // Normalize and write to result
+    const outCh=result.getChannelData(ch);
+    for(let i=0;i<outData.length;i++){
+      outCh[i]=outNorm[i]>0.001?outData[i]/outNorm[i]:inp[i];
+    }
+  }
+  return result;
+}
+
+// ─── Vocal Enhancement ───────────────────────────────────────────────────────
+async function enhanceVocal(){
+  if(!vocalBlob){alert('No vocal found. Go back and record or upload first.');return;}
+  const pr=PRESETS[selectedPreset];
+  document.getElementById('enhProg').classList.add('show');
+  document.getElementById('enhBtn').disabled=true;
+  document.getElementById('s2Next').disabled=true;
+
+  const steps=['ps1','ps2','ps3','ps4','ps5'];
+  const pcts=[0,20,40,65,85,100];
+  const bar=document.getElementById('enhBar');
+
+  function setStep(i){
+    steps.forEach((id,j)=>{
+      const el=document.getElementById(id);
+      if(j<i) el.className='prog-step done';
+      else if(j===i) el.className='prog-step active';
+      else el.className='prog-step';
+    });
+    bar.style.width=pcts[i]+'%';
+  }
+
+  try{
+    setStep(0); // noise removal
+    await new Promise(r=>setTimeout(r,300));
+    const audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const arrayBuf=await vocalBlob.arrayBuffer();
+    const srcBuf=await audioCtx.decodeAudioData(arrayBuf);
+    const sr=srcBuf.sampleRate;
+
+    // ── STEP 1: Breath / air gate (sample-level noise gate) ──────────────────
+    setStep(1);
+    await new Promise(r=>setTimeout(r,200));
+    const gateThreshold=pr.breathGate||0.03;
+    const frameSize=Math.floor(sr*0.015); // 15ms frames
+    const holdFrames=8;  // hold gate open 8 frames after signal drops
+    const gatedBuf=audioCtx.createBuffer(srcBuf.numberOfChannels,srcBuf.length,sr);
+    for(let ch=0;ch<srcBuf.numberOfChannels;ch++){
+      const inp=srcBuf.getChannelData(ch);
+      const out=gatedBuf.getChannelData(ch);
+      let gateOpen=false, holdCount=0;
+      for(let f=0;f<Math.ceil(inp.length/frameSize);f++){
+        const start=f*frameSize, end=Math.min(start+frameSize,inp.length);
+        // RMS energy of this frame
+        let rms=0;
+        for(let i=start;i<end;i++) rms+=inp[i]*inp[i];
+        rms=Math.sqrt(rms/(end-start));
+        if(rms>gateThreshold){gateOpen=true;holdCount=holdFrames;}
+        else if(holdCount>0){holdCount--;gateOpen=holdCount>0;}
+        else{gateOpen=false;}
+        // Apply gate with 5ms fade at boundaries
+        const fadeLen=Math.floor(sr*0.005);
+        for(let i=start;i<end;i++){
+          if(gateOpen){
+            const fadeIn=Math.min(1,(i-start+1)/fadeLen);
+            out[i]=inp[i]*(f===0||!gateOpen?fadeIn:1);
+          } else {
+            const fadeOut=Math.max(0,1-(i-start+1)/fadeLen);
+            out[i]=inp[i]*fadeOut;
+          }
+        }
+      }
+    }
+
+    // ── STEP 2: EQ chain ─────────────────────────────────────────────────────
+    setStep(2);
+    await new Promise(r=>setTimeout(r,200));
+    const offline=new OfflineAudioContext(gatedBuf.numberOfChannels,gatedBuf.length,sr);
+    const src=offline.createBufferSource();
+    src.buffer=gatedBuf;
+    let node=src;
+
+    const hp=offline.createBiquadFilter();
+    hp.type='highpass'; hp.frequency.value=pr.hpFreq; hp.Q.value=0.7;
+    node.connect(hp); node=hp;
+
+    const ls=offline.createBiquadFilter();
+    ls.type='peaking'; ls.frequency.value=pr.lowCutF; ls.Q.value=1.0; ls.gain.value=pr.lowCut;
+    node.connect(ls); node=ls;
+
+    const mid=offline.createBiquadFilter();
+    mid.type='peaking'; mid.frequency.value=pr.midBoostF; mid.Q.value=1.2; mid.gain.value=pr.midBoost;
+    node.connect(mid); node=mid;
+
+    const hs=offline.createBiquadFilter();
+    hs.type='highshelf'; hs.frequency.value=pr.hiBoostF; hs.gain.value=pr.hiBoost;
+    node.connect(hs); node=hs;
+
+    const dess=offline.createBiquadFilter();
+    dess.type='peaking'; dess.frequency.value=pr.deEssF; dess.Q.value=3.0; dess.gain.value=pr.deEss;
+    node.connect(dess); node=dess;
+
+    const lp=offline.createBiquadFilter();
+    lp.type='lowpass'; lp.frequency.value=pr.lpFreq; lp.Q.value=0.5;
+    node.connect(lp); node=lp;
+
+    // ── STEP 3: Compression ──────────────────────────────────────────────────
+    setStep(3);
+    await new Promise(r=>setTimeout(r,200));
+
+    const comp=offline.createDynamicsCompressor();
+    comp.threshold.value=pr.compThresh; comp.ratio.value=pr.compRatio;
+    comp.knee.value=pr.compKnee; comp.attack.value=pr.compAttack; comp.release.value=pr.compRelease;
+    node.connect(comp); node=comp;
+
+    if(pr.saturation>0){
+      const ws=offline.createWaveShaper();
+      const curve=new Float32Array(256);
+      const k=pr.saturation;
+      for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=(Math.PI+k)*x/(Math.PI+k*Math.abs(x));}
+      ws.curve=curve; ws.oversample='2x';
+      node.connect(ws); node=ws;
+    }
+
+    const conv=offline.createConvolver();
+    conv.buffer=makeIR(offline,pr.reverbDecay);
+    const dryG=offline.createGain(); dryG.gain.value=1-pr.reverbWet;
+    const wetG=offline.createGain(); wetG.gain.value=pr.reverbWet;
+    node.connect(dryG); node.connect(conv); conv.connect(wetG);
+    const merge=offline.createGain(); dryG.connect(merge); wetG.connect(merge); node=merge;
+
+    if(fxOn.Reverb){
+      const w=parseFloat(document.getElementById('reverbWet').value);
+      const conv2=offline.createConvolver();
+      conv2.buffer=makeIR(offline,parseFloat(document.getElementById('reverbRoom').value));
+      const dG=offline.createGain(); dG.gain.value=1-w;
+      const wG=offline.createGain(); wG.gain.value=w;
+      node.connect(dG); node.connect(conv2); conv2.connect(wG);
+      const m=offline.createGain(); dG.connect(m); wG.connect(m); node=m;
+    }
+    if(fxOn.Echo){
+      const d=offline.createDelay(2.0);
+      const fb=offline.createGain();
+      d.delayTime.value=parseFloat(document.getElementById('echoDelay').value);
+      fb.gain.value=parseFloat(document.getElementById('echoFeedback').value);
+      node.connect(d); d.connect(fb); fb.connect(d);
+      const m=offline.createGain(); node.connect(m); d.connect(m); node=m;
+    }
+
+    const out=offline.createGain(); out.gain.value=pr.outputGain;
+    node.connect(out); out.connect(offline.destination);
+    src.start(0);
+
+    // ── STEP 4: Polish & normalize ───────────────────────────────────────────
+    setStep(4);
+    let rendered=await offline.startRendering();
+
+    // ── AUTO-TUNE (post-render, sample-level pitch correction) ───────────────
+    if(fxOn.AutoTune){
+      rendered=applyAutoTune(rendered, sr,
+        parseInt(document.getElementById('atKey').value),
+        document.getElementById('atScale').value,
+        parseInt(document.getElementById('atSpeed').value),
+        parseFloat(document.getElementById('atAmount').value)
+      );
+    }
+
+    let maxV=0;
+    for(let ch=0;ch<rendered.numberOfChannels;ch++){
+      const d=rendered.getChannelData(ch);
+      for(let i=0;i<d.length;i++) maxV=Math.max(maxV,Math.abs(d[i]));
+    }
+    if(maxV>0.001){
+      const scale=0.891/maxV;
+      for(let ch=0;ch<rendered.numberOfChannels;ch++){
+        const d=rendered.getChannelData(ch);
+        for(let i=0;i<d.length;i++) d[i]*=scale;
+      }
+    }
+
+    bar.style.width='100%';
+    enhBlob=toWav(rendered);
+    document.getElementById('rawAudio').src=URL.createObjectURL(vocalBlob);
+    document.getElementById('enhAudio').src=URL.createObjectURL(enhBlob);
+    document.getElementById('enhCompare').style.display='block';
+    document.getElementById('s2Next').disabled=false;
+    document.getElementById('enhProg').classList.remove('show');
+  }catch(e){
+    alert('Enhancement error: '+e.message);
+    document.getElementById('enhBtn').disabled=false;
+  }
+  document.getElementById('enhBtn').disabled=false;
+}
+
+function skipEnh(){enhBlob=vocalBlob;goTo(4);}
+
+async function setupVocalTrim(){
+  const blob=enhBlob||vocalBlob; if(!blob)return;
+  const url=URL.createObjectURL(blob);
+  document.getElementById('trimAudio').src=url;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=await ctx.decodeAudioData(await blob.arrayBuffer());
+    vocalTrimBuf=buf;
+    initTrim(buf);
+  }catch(e){console.error('Trim setup error',e);}
+}
+
+// ─── Mixer ────────────────────────────────────────────────────────────────────
+async function mixTracks(){
+  const vocal=enhBlob||vocalBlob;
+  if(!vocal||!beatBlob){alert('Please upload both your vocal and beat first.');return;}
+  document.getElementById('mixProg').classList.add('show');
+  document.getElementById('mixBtn').disabled=true;
+  const vVol=document.getElementById('vVol').value/100;
+  const bVol=document.getElementById('bVol').value/100;
+  const vPan=parseFloat(document.getElementById('vPan').value);
+  const bPan=parseFloat(document.getElementById('bPan').value);
+  const vDelay=parseInt(document.getElementById('vDelay').value);
+  const master=parseFloat(document.getElementById('mastVol').value);
+
+  function stepM(i,pct){
+    ['mps1','mps2','mps3'].forEach((id,j)=>{
+      document.getElementById(id).className='prog-step'+(j<i?' done':j===i?' active':'');
+    });
+    document.getElementById('mixBar').style.width=pct+'%';
+  }
+
+  try{
+    stepM(0,10);
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const[vBuf,bBuf]=await Promise.all([
+      ctx.decodeAudioData(await vocal.arrayBuffer()),
+      ctx.decodeAudioData(await beatBlob.arrayBuffer())
+    ]);
+    const sr=ctx.sampleRate;
+    const totalLen=Math.max(vBuf.length+Math.floor(vDelay/1000*sr),bBuf.length);
+    const offline=new OfflineAudioContext(2,totalLen,sr);
+
+    stepM(1,40);
+
+    // Beat
+    const bSrc=offline.createBufferSource(); bSrc.buffer=bBuf;
+    const bGain=offline.createGain(); bGain.gain.value=bVol;
+    const bPanner=offline.createStereoPanner(); bPanner.pan.value=bPan;
+    bSrc.connect(bGain); bGain.connect(bPanner); bPanner.connect(offline.destination);
+    bSrc.start(0);
+
+    // Vocal (already enhanced)
+    const vSrc=offline.createBufferSource(); vSrc.buffer=vBuf;
+    const vGain=offline.createGain(); vGain.gain.value=vVol;
+    const vPanner=offline.createStereoPanner(); vPanner.pan.value=vPan;
+    vSrc.connect(vGain); vGain.connect(vPanner); vPanner.connect(offline.destination);
+    vSrc.start(vDelay/1000);
+
+    stepM(2,70);
+    const rendered=await offline.startRendering();
+
+    // Master normalize
+    let mx=0;
+    for(let ch=0;ch<rendered.numberOfChannels;ch++){
+      const d=rendered.getChannelData(ch);
+      for(let i=0;i<d.length;i++) mx=Math.max(mx,Math.abs(d[i]));
+    }
+    if(mx>0.001){
+      const sc=(0.891*master)/mx;
+      for(let ch=0;ch<rendered.numberOfChannels;ch++){
+        const d=rendered.getChannelData(ch);
+        for(let i=0;i<d.length;i++) d[i]*=sc;
+      }
+    }
+
+    document.getElementById('mixBar').style.width='100%';
+    mixedBuf=rendered;
+
+    // Go to AI editor (step 6)
+    const url=URL.createObjectURL(toWav(rendered));
+    document.getElementById('finalAudio').src=url;
+    document.getElementById('dlBtn').href=url;
+    document.getElementById('dlBtn').download='AMA-Voice-Studio.wav';
+    document.getElementById('mixProg').classList.remove('show');
+    goTo(6);
+  }catch(e){
+    alert('Mix error: '+e.message);
+  }
+  document.getElementById('mixBtn').disabled=false;
+}
+
+// ─── FL Studio Arranger ──────────────────────────────────────────────────────
+let flState={
+  vocal:{buf:null,trimStart:0,trimEnd:0,offset:0,muted:false,soloAudio:null},
+  beat: {buf:null,trimStart:0,trimEnd:0,offset:0,muted:false,soloAudio:null}
+};
+
+async function goToArrange(){
+  // Load both buffers in parallel
+  const vBlob=enhBlob||vocalBlob;
+  if(!vBlob||!beatBlob){alert('Need both vocal and beat loaded.');return;}
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const[vBuf,bBuf]=await Promise.all([
+      ctx.decodeAudioData(await vBlob.arrayBuffer()),
+      ctx.decodeAudioData(await beatBlob.arrayBuffer())
+    ]);
+    flState.vocal.buf=vBuf;
+    flState.beat.buf=bBuf;
+    flState.vocal.trimStart=0; flState.vocal.trimEnd=vBuf.duration; flState.vocal.offset=0;
+    flState.beat.trimStart=0;  flState.beat.trimEnd=bBuf.duration;  flState.beat.offset=0;
+    flState.vocal.muted=false; flState.beat.muted=false;
+    initFlTrack('vocal'); initFlTrack('beat');
+    drawFlWave('vocal'); drawFlWave('beat');
+    drawTimeline();
+    goTo(3);
+  }catch(e){alert('Could not load tracks: '+e.message);}
+}
+
+function initFlTrack(track){
+  const s=flState[track];
+  const prefix=track==='vocal'?'v':'b';
+  const dur=s.buf.duration;
+  const startEl=document.getElementById(prefix+'TrimStart');
+  const endEl=document.getElementById(prefix+'TrimEnd');
+  const offEl=document.getElementById(prefix+'Offset');
+  startEl.max=dur; startEl.value=0;
+  endEl.max=dur; endEl.value=dur;
+  offEl.max=30; offEl.value=0;
+  document.getElementById(prefix+'TrimStartV').textContent='0.0s';
+  document.getElementById(prefix+'TrimEndV').textContent=dur.toFixed(1)+'s';
+  document.getElementById(prefix+'OffsetV').textContent='0.0s';
+  document.getElementById(track+'Meta').textContent=dur.toFixed(1)+'s · '+
+    (s.buf.sampleRate/1000).toFixed(0)+'kHz · '+(s.buf.numberOfChannels===1?'Mono':'Stereo');
+}
+
+function drawFlWave(track){
+  const s=flState[track];
+  if(!s.buf) return;
+  const canvasId=track==='vocal'?'vocalWave':'beatWave';
+  const canvas=document.getElementById(canvasId);
+  const W=canvas.offsetWidth||300, H=52;
+  canvas.width=W*2; canvas.height=H*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+  const data=s.buf.getChannelData(0);
+  const step=Math.ceil(data.length/W);
+  const dur=s.buf.duration;
+  const startPct=s.trimStart/dur;
+  const endPct=s.trimEnd/dur;
+  const activeColor=track==='vocal'?'rgba(0,229,255,.9)':'rgba(123,47,255,.9)';
+  const dimColor='rgba(107,114,128,.25)';
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<W;i++){
+    let mn=1,mx=-1;
+    for(let j=0;j<step;j++){const v=data[i*step+j]||0;if(v<mn)mn=v;if(v>mx)mx=v;}
+    const frac=i/W;
+    const inRange=frac>=startPct&&frac<=endPct;
+    ctx.strokeStyle=inRange?activeColor:dimColor;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(i,(1+mn)*H/2);
+    ctx.lineTo(i,(1+mx)*H/2);
+    ctx.stroke();
+  }
+  // draw start/end markers
+  ctx.strokeStyle='rgba(0,224,150,.8)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(startPct*W,0); ctx.lineTo(startPct*W,H); ctx.stroke();
+  ctx.strokeStyle='rgba(255,80,80,.8)';
+  ctx.beginPath(); ctx.moveTo(endPct*W,0); ctx.lineTo(endPct*W,H); ctx.stroke();
+}
+
+function drawTimeline(){
+  const canvas=document.getElementById('arrangeTimeline');
+  if(!canvas) return;
+  const W=canvas.offsetWidth||300, H=48;
+  canvas.width=W*2; canvas.height=H*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+  ctx.clearRect(0,0,W,H);
+  const vs=flState.vocal, bs=flState.beat;
+  const vDur=(vs.trimEnd-vs.trimStart)+vs.offset;
+  const bDur=(bs.trimEnd-bs.trimStart)+bs.offset;
+  const totalDur=Math.max(vDur,bDur,0.1);
+  // vocal bar
+  const vStart=(vs.offset/totalDur)*W;
+  const vLen=((vs.trimEnd-vs.trimStart)/totalDur)*W;
+  ctx.fillStyle='rgba(0,229,255,.25)';
+  ctx.strokeStyle='rgba(0,229,255,.8)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(vStart,4,vLen,16,3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='rgba(0,229,255,.9)'; ctx.font='10px Space Mono,monospace';
+  ctx.fillText('🎤 '+(vs.trimEnd-vs.trimStart).toFixed(1)+'s',vStart+4,15);
+  // beat bar
+  const bStart=(bs.offset/totalDur)*W;
+  const bLen=((bs.trimEnd-bs.trimStart)/totalDur)*W;
+  ctx.fillStyle='rgba(123,47,255,.25)';
+  ctx.strokeStyle='rgba(123,47,255,.8)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(bStart,26,bLen,16,3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='rgba(170,100,255,.9)'; ctx.font='10px Space Mono,monospace';
+  ctx.fillText('🥁 '+(bs.trimEnd-bs.trimStart).toFixed(1)+'s',bStart+4,37);
+  document.getElementById('timelineDur').textContent='Total: '+totalDur.toFixed(1)+'s';
+}
+
+function onFlTrim(track){
+  const prefix=track==='vocal'?'v':'b';
+  const s=flState[track];
+  if(!s.buf) return;
+  let start=parseFloat(document.getElementById(prefix+'TrimStart').value);
+  let end=parseFloat(document.getElementById(prefix+'TrimEnd').value);
+  if(start>=end-0.3){start=end-0.3; document.getElementById(prefix+'TrimStart').value=start;}
+  s.trimStart=start; s.trimEnd=end;
+  document.getElementById(prefix+'TrimStartV').textContent=start.toFixed(1)+'s';
+  document.getElementById(prefix+'TrimEndV').textContent=end.toFixed(1)+'s';
+  drawFlWave(track); drawTimeline();
+}
+
+function onFlOffset(track){
+  const prefix=track==='vocal'?'v':'b';
+  const s=flState[track];
+  const v=parseFloat(document.getElementById(prefix+'Offset').value);
+  s.offset=v;
+  document.getElementById(prefix+'OffsetV').textContent=v.toFixed(1)+'s';
+  drawTimeline();
+}
+
+function flQuick(track,s,e){
+  const st=flState[track]; if(!st.buf) return;
+  const prefix=track==='vocal'?'v':'b';
+  document.getElementById(prefix+'TrimStart').value=Math.min(s,st.buf.duration);
+  document.getElementById(prefix+'TrimEnd').value=Math.min(e,st.buf.duration);
+  onFlTrim(track);
+}
+
+function flResetOffset(track){
+  const prefix=track==='vocal'?'v':'b';
+  const s=flState[track]; if(!s.buf) return;
+  document.getElementById(prefix+'TrimStart').value=0;
+  document.getElementById(prefix+'TrimEnd').value=s.buf.duration;
+  document.getElementById(prefix+'Offset').value=0;
+  s.trimStart=0; s.trimEnd=s.buf.duration; s.offset=0;
+  document.getElementById(prefix+'TrimStartV').textContent='0.0s';
+  document.getElementById(prefix+'TrimEndV').textContent=s.buf.duration.toFixed(1)+'s';
+  document.getElementById(prefix+'OffsetV').textContent='0.0s';
+  drawFlWave(track); drawTimeline();
+}
+
+let _soloSrc=null, _soloCtx=null;
+function soloPreview(track){
+  if(_soloSrc){try{_soloSrc.stop();}catch(e){} _soloSrc=null;}
+  const s=flState[track];
+  if(!s.buf) return;
+  const btn=document.getElementById(track+'SoloBtn');
+  btn.classList.add('playing'); btn.textContent='⏹ Stop';
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  _soloCtx=ctx;
+  const sr=s.buf.sampleRate;
+  const ss=Math.floor(s.trimStart*sr), es=Math.floor(s.trimEnd*sr);
+  const nc=s.buf.numberOfChannels;
+  const clip=ctx.createBuffer(nc,es-ss,sr);
+  for(let ch=0;ch<nc;ch++) clip.getChannelData(ch).set(s.buf.getChannelData(ch).subarray(ss,es));
+  const src=ctx.createBufferSource(); src.buffer=clip;
+  src.connect(ctx.destination); src.start(s.offset);
+  _soloSrc=src;
+  src.onended=()=>{btn.classList.remove('playing'); btn.textContent='▶ Solo';};
+}
+
+function toggleMute(track){
+  const s=flState[track];
+  s.muted=!s.muted;
+  const btn=document.getElementById(track+'MuteBtn');
+  btn.classList.toggle('muted',s.muted);
+  btn.textContent=s.muted?'UN-M':'M';
+}
+
+async function applyArrange(){
+  // Save trim decisions as blobs for mixer to use, including offset metadata
+  const vs=flState.vocal, bs=flState.beat;
+  if(!vs.buf||!bs.buf){alert('Both tracks must be loaded.');return;}
+  document.getElementById('arrangeProg').classList.add('show');
+  document.getElementById('arrangeLabel').textContent='Applying arrangement...';
+  document.getElementById('arrangeBar').style.width='30%';
+  document.getElementById('arrangeBtn').disabled=true;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const sr=vs.buf.sampleRate;
+    // Trim vocal
+    const vss=Math.floor(vs.trimStart*sr), ves=Math.floor(vs.trimEnd*sr);
+    const vnc=vs.buf.numberOfChannels;
+    const vClip=ctx.createBuffer(vnc,ves-vss,sr);
+    for(let ch=0;ch<vnc;ch++){
+      const d=vClip.getChannelData(ch);
+      d.set(vs.buf.getChannelData(ch).subarray(vss,ves));
+      const fade=Math.floor(0.01*sr);
+      for(let i=0;i<fade&&i<d.length;i++){d[i]*=i/fade; d[d.length-1-i]*=i/fade;}
+    }
+    // Trim beat
+    const bss=Math.floor(bs.trimStart*sr), bes=Math.floor(bs.trimEnd*sr);
+    const bnc=bs.buf.numberOfChannels;
+    const bClip=ctx.createBuffer(bnc,bes-bss,sr);
+    for(let ch=0;ch<bnc;ch++){
+      const d=bClip.getChannelData(ch);
+      d.set(bs.buf.getChannelData(ch).subarray(bss,bes));
+    }
+    document.getElementById('arrangeBar').style.width='70%';
+    // Store trimmed blobs and offsets for mixer
+    enhBlob=toWav(vClip);
+    beatBlob=toWav(bClip);
+    // Store offsets in the mixer's vDelay field
+    document.getElementById('vDelay').value=Math.round(vs.offset*1000);
+    sv('vDelayV',vs.offset.toFixed(1)+'s');
+    document.getElementById('arrangeBar').style.width='100%';
+    await new Promise(r=>setTimeout(r,300));
+    document.getElementById('arrangeProg').classList.remove('show');
+    goTo(5);
+  }catch(e){
+    alert('Arrange error: '+e.message);
+  }
+  document.getElementById('arrangeBtn').disabled=false;
+}
+
+function skipArrange(){goTo(5);}
+
+// ─── Format ───────────────────────────────────────────────────────────────────
+function selFmt(f){
+  selectedFmt=f;
+  document.getElementById('fmtWav').classList.toggle('active',f==='wav');
+  document.getElementById('fmtMp3').classList.toggle('active',f==='mp3');
+}
+
+// ─── Audio utils ──────────────────────────────────────────────────────────────
+function makeIR(ctx,decay){
+  const len=Math.floor(ctx.sampleRate*decay*2.5);
+  const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let ch=0;ch<2;ch++){
+    const d=buf.getChannelData(ch);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay*2.5);
+  }
+  return buf;
+}
+
+function toWav(buf){
+  const nc=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length*nc*2;
+  const ab=new ArrayBuffer(44+len),v=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+len,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*nc*2,true);v.setUint16(32,nc*2,true);
+  v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,len,true);
+  let off=44;
+  for(let i=0;i<buf.length;i++) for(let ch=0;ch<nc;ch++){
+    const s=Math.max(-1,Math.min(1,buf.getChannelData(ch)[i]));
+    v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+async function encMP3(buf){
+  return new Promise(res=>{
+    const nc=buf.numberOfChannels,sr=buf.sampleRate;
+    const enc=new lamejs.Mp3Encoder(nc,sr,128),bs=1152,mp3=[];
+    const L=buf.getChannelData(0),R=nc>1?buf.getChannelData(1):L;
+    const i16=f=>Math.max(-32768,Math.min(32767,Math.round(f*32767)));
+    for(let i=0;i<buf.length;i+=bs){
+      const lc=new Int16Array(Math.min(bs,buf.length-i));
+      const rc=new Int16Array(lc.length);
+      for(let j=0;j<lc.length;j++){lc[j]=i16(L[i+j]);rc[j]=i16(R[i+j]);}
+      const d=nc>1?enc.encodeBuffer(lc,rc):enc.encodeBuffer(lc);
+      if(d.length>0)mp3.push(new Int8Array(d));
+    }
+    const f=enc.flush();if(f.length>0)mp3.push(new Int8Array(f));
+    res(new Blob(mp3,{type:'audio/mp3'}));
+  });
+}
+
+// ─── AI Song Editor (built-in — no API needed) ───────────────────────────────
+const AI_ADVICE={
+  'Afrobeats':{
+    bpm:'100–115 BPM',beat:'Afrobeats pattern — heavy kick on 1, open hi-hat on the "and" of 2, snappy snare on 3. Add shakers throughout.',
+    arrangement:'Intro (8 bars instrumental) → Verse 1 → Pre-chorus ("lift") → Chorus → Verse 2 → Chorus → Bridge (key change or spoken word) → Outro fade',
+    pro:'Layer a talking drum or conga sample under your hi-hats. Burna Boy and Wizkid always have organic percussion textures buried in the mix — it is what makes it feel alive.',
+    mix:'Keep vocals at 85–90%, beat at 55–60%. Boost vocal presence at 3kHz. Side-chain the bass lightly to the kick for that bouncy groove feel.'
+  },
+  'Afropop':{
+    bpm:'100–120 BPM',beat:'Clean 4/4 kick pattern with syncopated hi-hats. Use a bright, snappy snare. Add wood block or shaker on off-beats.',
+    arrangement:'Short 4-bar intro → Hook first (Afropop puts the chorus early) → Verse → Hook → Bridge (rap or spoken) → Hook → Outro',
+    pro:'Double your chorus vocals in harmony — even just a 3rd above. Every major Afropop hit has stacked harmonies on the hook. Record the harmony twice for width.',
+    mix:'Vocals very forward (90%). Add subtle reverb on chorus only. Keep the beat clean and uncluttered — let the vocal carry the emotion.'
+  },
+  'Rap / Trap':{
+    bpm:'130–145 BPM (or 65–72 "half-time")',beat:'808 bass on 1 and 3, rapid hi-hat triplets, crisp snare on 2 and 4. Add a sub-bass 808 slide between notes.',
+    arrangement:'Intro (4 bars of beat) → Verse 1 (16 bars) → Hook (8 bars) → Verse 2 (16 bars) → Hook → Bridge (optional, 8 bars) → Hook → Outro',
+    pro:'Record your hook twice and pan one 15% left, one 15% right. Every streaming-ready trap song has doubled hooks — it creates that "radio width" people feel subconsciously.',
+    mix:'Vocals 80–85%, cut everything below 100Hz on the vocal. 808 bass needs room — do not let the beat low-end compete with it. Side-chain compression on the beat makes vocals pop forward.'
+  },
+  'R&B / Soul':{
+    bpm:'70–95 BPM',beat:'Soft kick, lazy snare with a rimshot feel. Use a swung 16th hi-hat pattern. Sub-bass movement under the chord progressions.',
+    arrangement:'Intro (piano/keys alone) → Verse 1 → Pre-chorus → Chorus → Verse 2 → Chorus → Bridge (emotional peak) → Final Chorus (key change) → Outro',
+    pro:'Use a "whisper track" — record yourself singing very softly right over your main vocal and blend it in at -15dB. It adds intimacy and warmth that no plugin can replicate.',
+    mix:'Vocals at 88%, silky compression (2:1 ratio, slow attack). Add just a touch of tape saturation. The vocal should float above the beat, never competing.'
+  },
+  'Hip-Hop':{
+    bpm:'85–100 BPM',beat:'Boom-bap or boom-bap-trap hybrid. Punchy kick on 1, tight snare on 2 and 4. Sample-based or soulful chord stabs.',
+    arrangement:'Intro (4–8 bars) → Verse 1 (16 bars) → Hook (4–8 bars) → Verse 2 → Hook → Verse 3 or Bridge → Hook → Outro',
+    pro:'Leave space — hip-hop is about the pocket and the rhythm of the words, not constant sound. Let your beat breathe. The best hip-hop producers know what NOT to add.',
+    mix:'Vocals dry and upfront — minimal reverb. Cut low mids on the vocal at 300–400Hz to remove muddiness. Boost the attack at 5kHz to make every word hit.'
+  },
+  'UK Drill':{
+    bpm:'140–150 BPM (half-time feel at 70–75)',beat:'Sliding 808, aggressive hi-hat rolls, dark minor-key melody. Almost no snare reverb — keep it dry and hard.',
+    arrangement:'Intro (4 bars, dark) → Verse 1 (16 bars) → Hook (minimal, 4–8 bars) → Verse 2 → Hook → Outro (abrupt cut)',
+    pro:'UK Drill lives in the low end. Your 808 should be loud — almost uncomfortably loud in the mix. Use a hard limiter on the master to keep the 808 from clipping while still hitting hard.',
+    mix:'Vocals very dry (0–5% reverb), cut harshly at 120Hz, add grit with slight saturation. Beat bass and kick should dominate — this genre is bottom-heavy by design.'
+  },
+  'Gospel':{
+    bpm:'60–85 BPM (slow gospel) or 110–130 BPM (contemporary gospel)',beat:'Full live drum feel — kick, snare, hi-hat with cymbals. Layer with hand claps on 2 and 4. Add organ or piano stabs.',
+    arrangement:'Intro (choir or keys) → Verse 1 → Chorus → Verse 2 → Chorus → Vamp/Spontaneous section → Final Chorus (key change) → Outro (fade or cut)',
+    pro:'The "vamp" or "groove section" is sacred in Gospel — leave 8–16 bars where the music loops and the vocalist can ad-lib freely. This is where the best moments happen.',
+    mix:'Vocals should be powerful and full — do not cut too much low-end. Reverb is your friend here: medium-large room. Stack background vocals in 3-part harmony.'
+  },
+  'Pop':{
+    bpm:'100–130 BPM',beat:'Simple, clean 4/4. Four-on-the-floor kick or kick on 1 and 3. Crisp snare on 2 and 4. Bright hi-hats. Synth bass.',
+    arrangement:'Verse 1 (short, 8 bars) → Pre-chorus (4 bars) → Chorus (BIG, 8 bars) → Verse 2 → Pre-chorus → Chorus → Bridge (16 bars) → Final Chorus',
+    pro:'The "ear candy" rule — add a new sound every 8 bars so the listener never gets bored. A synth riser, a new percussion layer, a filter sweep. Small details keep people engaged.',
+    mix:'Lead vocal loud and center. Chorus needs to feel bigger than the verse — add reverb, layer harmonies, boost 8–12kHz air. The contrast between verse and chorus is everything.'
+  },
+  'Amapiano':{
+    bpm:'100–114 BPM',beat:'Log drum is everything — deep, resonant log drum pattern on the downbeat. Layered with soft hi-hats and a bouncy kick. Piano chords are key.',
+    arrangement:'Intro (log drum and keys) → Build (add elements) → Drop (full groove) → Break (strip back) → Drop again → Outro',
+    pro:'The log drum and piano piano must breathe together rhythmically. Leave gaps in the piano where the log drum speaks. Kabza De Small and DJ Maphorisa always create "call and response" between instruments.',
+    mix:'Log drum should be deep and present — boost 60–80Hz and 2kHz for punch. Vocals can be more laid-back in the mix (75–80%) — Amapiano is groove-first, vocal-second.'
+  },
+  'Dancehall':{
+    bpm:'95–110 BPM',beat:'Riddim pattern — one-drop (kick and snare only on beat 3), or steppers (kick on every beat). Use sharp, short snare. Add synth bass stab.',
+    arrangement:'Intro (riddim alone) → Verse 1 → Chorus/Hook → Verse 2 → Chorus → "Slack" or bridge → Chorus → Outro',
+    pro:'Dancehall melodies are chanted and syncopated — your lyrics should naturally bounce on the off-beat. If your vocal feels stiff on the riddim, try shifting your delivery half a beat earlier.',
+    mix:'Vocal bright and upfront with tight reverb (short room). Beat very present and punchy. Bass needs to hit hard but stay clean — no muddiness below 60Hz.'
+  },
+  'Highlife':{
+    bpm:'100–120 BPM',beat:'Guitar-driven rhythm with a swing feel. Kick on 1 and 3, soft snare with brush feel. Add congas or talking drum for authentic texture.',
+    arrangement:'Intro (guitar riff) → Verse 1 → Chorus → Verse 2 → Chorus → Guitar/horn solo → Chorus → Outro (fade)',
+    pro:'The Highlife guitar pattern should feel like it "breathes" — use palm muting on the downbeat and let the notes ring on the upbeat. This is what separates a real Highlife feel from a generic one.',
+    mix:'Warm, vintage vocal sound — add slight tape saturation and gentle room reverb. Guitar should be bright (boost 5kHz). Keep it musical and organic, avoid over-processing.'
+  }
+};
+
+const MOOD_TIPS={
+  'Hype / Energetic':'Make your delivery aggressive and confident. No long pauses. Layer ad-libs ("yeah", "aye") between your main lines for energy. Compress hard — dynamic range kills hype.',
+  'Romantic / Love':'Slow your delivery down. Breathe between phrases. Use a gentle vibrato at the end of held notes. Add harmony vocal at a 3rd or 5th above the main line on the chorus.',
+  'Sad / Emotional':'Sing slightly under pitch intentionally — it creates tension. Use long reverb tails. Let your vocal break naturally — do not auto-tune away the cracks, they are emotional gold.',
+  'Motivational':'Punch every stressed syllable. Speak directly to "you" (the listener). Build in intensity from verse to chorus. Verse should feel personal, chorus should feel universal.',
+  'Party / Fun':'Keep vocals tight and rhythmic. Ad-libs are your best friend. Double the hook (record it twice). Energy should feel like you are already in the club.',
+  'Spiritual':'Slow, intentional delivery. Every word matters. Use silence as an instrument — a 1-beat pause before a key phrase is more powerful than any effect.',
+  'Aggressive':'Hard consonants — bite your Ts and Ks. Vocal should feel like a punch. Use minimal reverb to keep it in-your-face. Compress very hard so every word is at full power.'
+};
+
+async function runAIEditor(){
+  const genre=document.getElementById('aiGenre').value;
+  const mood=document.getElementById('aiMood').value;
+  const desc=document.getElementById('aiDesc').value.trim();
+  const preset=selectedPreset;
+
+  document.getElementById('aiBtn').disabled=true;
+  document.getElementById('aiLoading').style.display='block';
+  document.getElementById('aiResult').style.display='none';
+
+  // Simulate thinking time
+  await new Promise(r=>setTimeout(r,1800));
+
+  const info=AI_ADVICE[genre]||AI_ADVICE['Afrobeats'];
+  const moodTip=MOOD_TIPS[mood]||MOOD_TIPS['Hype / Energetic'];
+  const presetName=preset.startsWith('bl-')?'BandLab '+preset.replace('bl-',''):preset;
+
+  var vaMap={
+    'vocal':'The Vocal Clean preset gives your '+genre+' track a balanced, radio-ready clarity. It is a great neutral starting point — your voice will sit naturally in the mix without sounding over-processed.',
+    'rap':'The Rap preset gives your '+genre+' track aggressive punch and crisp high-end definition. The hard compression locks your delivery in the pocket — this is production-ready for streaming.',
+    'afro':'The Afrobeats preset adds warmth and brightness that complements the genre perfectly. The subtle saturation gives your voice that "warm analog" quality top '+genre+' producers pay thousands to achieve.',
+    'nf':'The NF/Emo Rap preset keeps things raw and intimate — perfect for emotional content. The natural reverb tail makes your voice feel close, like a confession. Very powerful for '+genre+'.',
+    'rnb':'The R&B preset makes your voice silky and smooth — exactly what '+genre+' listeners expect. The lush reverb creates space around your vocal that feels professional and intentional.',
+    'pop':'The Pop Radio preset is loud, bright, and punchy — built for streaming volume matching. Your '+genre+' track will hold its own against major label releases on Spotify.',
+    'gospel':'The Gospel preset gives your voice fullness and power. The cathedral reverb creates a sense of space that lifts the emotional impact. Perfect for '+genre+' vocal delivery.',
+    'podcast':'The Podcast preset delivers ultra-clear speech — every word is intelligible. For '+genre+', you may want to add a touch of reverb in the mixer to give it more musical character.',
+    'bl-club':'The BandLab Club Banger preset hits hard with maximum loudness and saturation. Your '+genre+' track will translate well on speakers and club systems.',
+    'bl-drill':'The BandLab UK Drill preset is dark and aggressive with tight dynamics. The deep sub presence locks perfectly with '+genre+' bass patterns.',
+    'bl-smooth':'The BandLab Smooth Vocals preset gives a clean, professional sound that sits naturally in '+genre+' productions. Silky without being over-processed.',
+    'bl-hiphop':'The BandLab Hip-Hop Pro preset delivers studio-quality warmth and clarity. The Auto-Tune warmth adds a subtle pitch smoothness that works great for '+genre+'.'
+  };
+  var vocalAssessment=vaMap[preset]||('The '+presetName+' preset is a solid foundation for your '+genre+' track. It handles the fundamentals — noise, EQ, compression — professionally.');
+
+  var descLine=desc?('\n\n\uD83D\uDCAC FOR YOUR SONG: "'+desc+'" — lean into the '+mood.toLowerCase()+' energy throughout. Don\'t hold back emotionally; the best takes are always the ones where you forget you\'re recording.'):'';
+  var text='\uD83C\uDFA4 VOCAL ASSESSMENT\n'+vocalAssessment+'\n\n\uD83C\uDF9A\uFE0F MIX TIPS\n\u2022 '+info.mix+'\n\u2022 MOOD \u2014 '+moodTip+'\n\u2022 In Step 5, set Vocal Offset to 0.5\u20131s so your voice enters slightly after the beat drops \u2014 gives it impact.\n\n\uD83E\uDD41 BEAT SELECTION ADVICE\nAim for '+info.bpm+'. '+info.beat+'\n\n\uD83D\uDD0A ARRANGEMENT TIPS\n'+info.arrangement+'\n\n\uD83D\uDE80 PRO FINISHING TOUCH\n'+info.pro+descLine;
+
+  document.getElementById('aiText').textContent=text;
+  document.getElementById('aiResult').style.display='block';
+  document.getElementById('aiLoading').style.display='none';
+  document.getElementById('aiBtn').disabled=false;
+}
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function startOver(){
+  vocalBlob=null;enhBlob=null;beatBlob=null;mixedBuf=null;vocalTrimBuf=null;
+  flState={
+    vocal:{buf:null,trimStart:0,trimEnd:0,offset:0,muted:false,soloAudio:null},
+    beat: {buf:null,trimStart:0,trimEnd:0,offset:0,muted:false,soloAudio:null}
+  };
+  if(_soloSrc){try{_soloSrc.stop();}catch(e){} _soloSrc=null;}
+  document.getElementById('s1Next').disabled=true;
+  document.getElementById('s2Next').disabled=true;
+  document.getElementById('s3Next').disabled=true;
+  document.getElementById('enhBtn').disabled=false;
+  document.getElementById('mixBtn').disabled=false;
+  document.getElementById('arrangeBtn').disabled=false;
+  document.getElementById('aiBtn').disabled=false;
+  document.getElementById('enhCompare').style.display='none';
+  document.getElementById('enhProg').classList.remove('show');
+  document.getElementById('mixProg').classList.remove('show');
+  document.getElementById('arrangeProg').classList.remove('show');
+  document.getElementById('aiLoading').style.display='none';
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('aiDesc').value='';
+  document.getElementById('vChip').classList.remove('show');
+  document.getElementById('bChip').classList.remove('show');
+  document.getElementById('recZone').className='record-zone';
+  document.getElementById('recTitle').textContent='Tap to start recording';
+  document.getElementById('recSub').textContent='Sing close to your mic in a quiet room';
+  goTo(1);
+}
+</script>
+</body>
+</html>
